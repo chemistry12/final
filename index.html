@@ -150,6 +150,24 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 .spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ── 화면 안내사항 박스 ── */
+.sc-notes{
+  background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--acc);border-radius:0 8px 8px 0;
+  padding:8px 14px;
+}
+.sc-notes-title{
+  font-size:10px;font-weight:700;color:var(--acc);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;
+}
+.sc-note-item{
+  font-size:12px;color:var(--text);line-height:1.7;
+  padding-left:12px;position:relative;
+}
+.sc-note-item::before{
+  content:'▸';position:absolute;left:0;color:var(--acc);font-size:10px;
+}
+
 /* ── 인쇄 영역 (화면에서는 숨김) ── */
 #printArea{display:none}
 
@@ -297,6 +315,28 @@ tr:nth-child(even) .slot{background:var(--surface2)}
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
 
+  /* ── 안내사항 주석 ── */
+  .pp-notes{
+    margin-top:6px; padding:6px 10px 7px;
+    border:1px solid #CBD5E1; border-left:3px solid #2C5EE8;
+    border-radius:0 6px 6px 0;
+    background:#F8FAFC!important;
+    flex-shrink:0;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-notes-title{
+    font-size:9px; font-weight:700; color:#2C5EE8;
+    text-transform:uppercase; letter-spacing:.06em;
+    margin-bottom:4px;
+  }
+  .pp-note-item{
+    font-size:10px; color:#1B2740; line-height:1.7;
+    padding-left:10px; position:relative;
+  }
+  .pp-note-item::before{
+    content:'▸'; position:absolute; left:0; color:#2C5EE8; font-size:9px;
+  }
+
   /* ── 하단 푸터 (범례) ── */
   .pp-footer{
     display:flex; align-items:center; justify-content:space-between;
@@ -349,6 +389,17 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsExXw_6ugNOmS3Xj9HI1iLUy5LMbOQs5QqudzHTlZ79E2_WKkkwg/exec';
+
+// ══════════════════════════════════════════════════════════════
+//  인쇄 고정 안내사항 — 모든 교사 인쇄본에 공통으로 표시됩니다.
+//  빈 문자열('')로 바꾸면 안내사항이 나오지 않습니다.
+// ══════════════════════════════════════════════════════════════
+const PRINT_NOTE_GLOBAL = '2개반을 감독하는 경우 (예) 6반+7반 : 6반 뒷문, 7반 앞문을 열고 복도 책상에서 자습 감독해주시면 됩니다!';
+
+// ── 교사별 개별 추가 안내 (필요할 때만 사용) ──
+const PRINT_NOTES = {
+  // '홍길동': '추가 안내사항',
+};
 
 const DAYS    = ['월','화','수','목','금'];
 const PERIODS = [7, 6, 6, 7, 6];
@@ -470,6 +521,17 @@ function select(name){
   badge.className = 'top-badge ' + (hasDiff ? 'b-chg' : 'b-ok');
   badge.textContent = hasDiff ? `변경 ${diffs.length}개` : '변경 없음';
 
+  // 화면 안내사항
+  const rawExtra0 = PRINT_NOTES[name];
+  const extraArr0 = rawExtra0 ? (Array.isArray(rawExtra0) ? rawExtra0 : [rawExtra0]) : [];
+  const allNotes0 = [...(PRINT_NOTE_GLOBAL ? [PRINT_NOTE_GLOBAL] : []), ...extraArr0];
+  const scNotesHtml = allNotes0.length
+    ? `<div class="sc-notes">
+        <div class="sc-notes-title">📌 안내사항</div>
+        ${allNotes0.map(n => `<div class="sc-note-item">${esc(n)}</div>`).join('')}
+      </div>`
+    : '';
+
   document.getElementById('content').innerHTML = `
     <div class="legend">
       <span class="ld ld-d"></span><span>변경된 수업</span>
@@ -482,6 +544,7 @@ function select(name){
       <span class="lsep"></span>
       <span>회색 = 해당 요일에 없는 교시</span>
     </div>
+    ${scNotesHtml}
     <div class="grids">
       <div class="card">
         <div class="card-hd hd-b">◀ 변경 전</div>
@@ -503,6 +566,22 @@ function buildPrintPage(name){
   const hasDiff = diffs.length > 0;
   const badgeCls = hasDiff ? 'pp-badge-chg' : 'pp-badge-ok';
   const badgeTxt = hasDiff ? `변경 ${diffs.length}개` : '변경 없음';
+
+  // 인쇄 주석 — 고정 + 교사별 병합
+  const rawExtra = PRINT_NOTES[name];
+  const extraArr = rawExtra
+    ? (Array.isArray(rawExtra) ? rawExtra : [rawExtra])
+    : [];
+  const allNotes = [
+    ...(PRINT_NOTE_GLOBAL ? [PRINT_NOTE_GLOBAL] : []),
+    ...extraArr,
+  ];
+  const notesHtml = allNotes.length
+    ? `<div class="pp-notes">
+        <div class="pp-notes-title">📌 안내사항</div>
+        ${allNotes.map(n => `<div class="pp-note-item">${esc(n)}</div>`).join('')}
+      </div>`
+    : '';
 
   return `<div class="pp">
     <div class="pp-bar"></div>
@@ -526,6 +605,7 @@ function buildPrintPage(name){
           ${buildGrid(DB.after[name], diffs)}
         </div>
       </div>
+      ${notesHtml}
     </div>
     <div class="pp-footer">
       <div class="pp-legend">
