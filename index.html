@@ -135,6 +135,9 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 .slot.final{background:#FFFF00!important;border-color:#CCA800!important}
 .final .cs{color:#0033FF!important;font-weight:800!important}
 .final .cr{color:#0022CC!important}
+.slot.plus{background:#7CFC00!important;border-color:#3DA800!important}
+.plus .cs{color:#000000!important;font-weight:800!important}
+.plus .cr{color:#1A1A1A!important}
 .empty{color:var(--border);font-size:20px;line-height:56px}
 .na{background:var(--border)!important;opacity:.3}
 
@@ -283,6 +286,12 @@ tr:nth-child(even) .slot{background:var(--surface2)}
   }
   .pp .final .cs{ color:#0033FF!important; font-weight:800!important; }
   .pp .final .cr{ color:#0022CC!important; }
+  .pp .slot.plus{
+    background:#7CFC00!important; border-color:#3DA800!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .plus .cs{ color:#000000!important; font-weight:800!important; }
+  .pp .plus .cr{ color:#1A1A1A!important; }
   .pp .na{
     background:#EEF1F6!important; opacity:.6;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
@@ -429,8 +438,9 @@ function buildGrid(sched, diffKeys){
       const cell   = sched ? sched[key] : null;
       const isDiff  = diffKeys && diffKeys.includes(key);
       const isFinal = cell && cell.s && cell.s.includes('FINAL수업');
+      const isPlus  = cell && cell.r && cell.r.includes('+');
       if(cell){
-        const cls = ['slot', isDiff?'diff':'', isFinal?'final':''].filter(Boolean).join(' ');
+        const cls = ['slot', isDiff?'diff':'', isFinal?'final':'', isPlus?'plus':''].filter(Boolean).join(' ');
         const crLines = (cell.r || '').split('\n').filter(Boolean);
         const crHtml = crLines.map(p=>`<span class="cr">${esc(p)}</span>`).join('');
         h += `<td class="${cls}"><div class="ci">
@@ -465,6 +475,8 @@ function select(name){
       <span class="ld ld-d"></span><span>변경된 수업</span>
       <span class="lsep"></span>
       <span class="ld" style="background:#FFFF00;border:1.5px solid #CCA800"></span><span>FINAL수업</span>
+      <span class="lsep"></span>
+      <span class="ld" style="background:#7CFC00;border:1.5px solid #3DA800"></span><span>대체교사(+)</span>
       <span class="lsep"></span>
       <span>· 빈 교시</span>
       <span class="lsep"></span>
@@ -521,6 +533,8 @@ function buildPrintPage(name){
         <span class="pp-lsep"></span>
         <span class="pp-ld" style="background:#FFFF00;border:1px solid #CCA800"></span>FINAL수업
         <span class="pp-lsep"></span>
+        <span class="pp-ld" style="background:#7CFC00;border:1px solid #3DA800"></span>대체교사(+)
+        <span class="pp-lsep"></span>
         회색 = 해당 요일에 없는 교시
       </div>
       <div class="pp-copy">영생고등학교</div>
@@ -574,9 +588,23 @@ window.addEventListener('beforeprint', function(){
   document.querySelectorAll('#printArea .final .cr').forEach(function(el){
     el.style.setProperty('color','#0022CC','important');
   });
+  // + 대체교사 배경색 강제
+  document.querySelectorAll('#printArea .slot.plus').forEach(function(el){
+    el.style.setProperty('background','#7CFC00','important');
+    el.style.setProperty('border-color','#3DA800','important');
+    el.style.setProperty('-webkit-print-color-adjust','exact','important');
+    el.style.setProperty('print-color-adjust','exact','important');
+  });
+  document.querySelectorAll('#printArea .plus .cs').forEach(function(el){
+    el.style.setProperty('color','#000000','important');
+    el.style.setProperty('font-weight','800','important');
+  });
+  document.querySelectorAll('#printArea .plus .cr').forEach(function(el){
+    el.style.setProperty('color','#1A1A1A','important');
+  });
 });
 window.addEventListener('afterprint', function(){
-  var sel = '#printArea .pp-card, #printArea .tw, #printArea .tt, #printArea .slot, #printArea thead th, #printArea .diff .cs, #printArea .diff .cr, #printArea .final .cs, #printArea .final .cr';
+  var sel = '#printArea .pp-card, #printArea .tw, #printArea .tt, #printArea .slot, #printArea thead th, #printArea .diff .cs, #printArea .diff .cr, #printArea .final .cs, #printArea .final .cr, #printArea .plus .cs, #printArea .plus .cr';
   ['overflow','max-width','table-layout','width','min-width','background','border-color','-webkit-print-color-adjust','print-color-adjust','color','font-weight'].forEach(function(prop){
     document.querySelectorAll(sel).forEach(function(el){
       el.style.removeProperty(prop);
