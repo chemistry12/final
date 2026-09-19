@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>교사 시간표 비교</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* ── 토큰 ── */
+:root {
+  --bg:#F0F3F8; --surface:#FFFFFF; --surface2:#F5F7FB;
+  --border:#DDE3ED; --text:#1B2740; --muted:#6B7A99; --light:#A0AABF;
+  --acc:#2C5EE8; --acc-lt:#EEF2FF;
+  --b-hd:#EBF3FF; --b-hd-c:#1E40AF;
+  --a-hd:#ECFDF5; --a-hd-c:#065F46;
+  --diff:#FFF4E5; --diff-bd:#F59E0B; --diff-c:#92400E;
+  --final:#FFF176; --final-c:#5C3200;
+  --sb:#1B2740; --sb-t:#8A9DBF; --sb-act:#2C5EE8; --sb-ho:#243050;
+  --r:10px;
+  --font:'Noto Sans KR',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1623;--surface:#1A2235;--surface2:#151E2E;
+  --border:#263046;--text:#DDE5F5;--muted:#7A8EAF;--light:#3D4F6E;
+  --acc:#4F7FFF;--acc-lt:#182040;
+  --b-hd:#182040;--b-hd-c:#93B4FC;
+  --a-hd:#062818;--a-hd-c:#6EE7B7;
+  --diff:#2A1A05;--diff-bd:#D97706;--diff-c:#FCD34D;
+  --final:#4A3A00;--final-c:#FFE57F;
+  --sb:#0A1020;--sb-t:#6A7E9E;--sb-act:#4F7FFF;--sb-ho:#141E30;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F1623;--surface:#1A2235;--surface2:#151E2E;
+  --border:#263046;--text:#DDE5F5;--muted:#7A8EAF;--light:#3D4F6E;
+  --acc:#4F7FFF;--acc-lt:#182040;
+  --b-hd:#182040;--b-hd-c:#93B4FC;
+  --a-hd:#062818;--a-hd-c:#6EE7B7;
+  --diff:#2A1A05;--diff-bd:#D97706;--diff-c:#FCD34D;
+  --final:#4A3A00;--final-c:#FFE57F;
+  --sb:#0A1020;--sb-t:#6A7E9E;--sb-act:#4F7FFF;--sb-ho:#141E30;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  display:flex;height:100%;overflow:hidden;font-size:14px;
+}
+
+/* ── 사이드바 ── */
+.sb{width:160px;min-width:160px;background:var(--sb);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sb-hd{padding:16px 14px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.sb-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--light);margin-bottom:3px}
+.sb-cnt{font-size:12px;color:var(--sb-t)}
+.sb-srch{padding:8px 10px 6px;border-bottom:none}
+.sb-filter{padding:0 10px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.btn-sort{
+  width:100%;font-family:var(--font);font-size:11px;font-weight:600;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;color:var(--sb-t);padding:5px 8px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:background .15s;
+}
+.btn-sort:hover{background:rgba(255,255,255,.1);color:#CBD8F0}
+.btn-sort.on{background:var(--sb-act);border-color:var(--sb-act);color:#fff}
+.sb-srch input{
+  width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;color:var(--sb-t);font-size:12px;padding:5px 8px;outline:none;font-family:var(--font);
+}
+.sb-srch input::placeholder{color:rgba(138,157,191,.4)}
+.sb-srch input:focus{border-color:var(--sb-act)}
+.sb-list{overflow-y:auto;flex:1;padding:4px 0}
+.sb-list::-webkit-scrollbar{width:3px}
+.sb-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.ti{padding:8px 14px;font-size:13px;color:var(--sb-t);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .1s}
+.ti:hover{background:var(--sb-ho);color:#CBD8F0}
+.ti.on{background:var(--sb-act);color:#fff;font-weight:600}
+.ti .badges{margin-left:auto;display:flex;gap:3px;align-items:center}
+.ti .chg{background:#F59E0B;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px}
+.ti .fin{background:#FFEB3B;color:#5C3200;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px}
+.ti.on .chg{background:rgba(255,255,255,.3);color:#fff}
+.ti.on .fin{background:rgba(255,235,59,.35);color:#FFF9C4}
+
+/* ── 메인 ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:11px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.top-name{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.top-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.top-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+.b-ok{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.b-chg{background:#FFF4E5;color:#92400E;border:1px solid #FCD34D}
+
+/* ── 인쇄 버튼 ── */
+.print-btns{margin-left:auto;display:flex;gap:6px;align-items:center;flex-shrink:0}
+.btn-p{
+  font-family:var(--font);font-size:12px;font-weight:600;
+  padding:6px 12px;border-radius:7px;border:none;cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:opacity .15s;
+}
+.btn-p:hover{opacity:.8}
+.btn-p-cur{background:var(--acc);color:#fff}
+.btn-p-all{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+
+.content{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── 그리드 ── */
+.grids{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-hd{padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hd-b{background:var(--b-hd);color:var(--b-hd-c)}
+.hd-a{background:var(--a-hd);color:var(--a-hd-c)}
+/* 날짜 범위 텍스트 */
+.date-range{font-size:12px;font-weight:600;color:var(--a-hd-c);margin-left:4px;letter-spacing:0}
+
+/* ── 시간표 테이블 ── */
+.tw{overflow-x:auto}
+.tt{border-collapse:collapse;width:100%;font-size:12px}
+.tt th,.tt td{border:1px solid var(--border);text-align:center;vertical-align:middle;padding:0}
+.tt thead th{background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.03em;padding:7px 6px}
+.tt thead th.dy{background:var(--acc-lt);color:var(--acc);font-size:13px;font-weight:700;min-width:110px}
+.pd{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;width:46px;padding:0 6px;white-space:nowrap}
+.slot{height:56px;min-width:110px}
+tr:nth-child(odd) .slot{background:var(--surface)}
+tr:nth-child(even) .slot{background:var(--surface2)}
+.slot.diff{background:var(--diff)!important;border-color:var(--diff-bd)!important}
+.ci{padding:5px 8px;line-height:1.4}
+.cs{font-weight:600;font-size:12px;color:var(--text);display:block}
+.cr{font-size:11px;font-weight:700;color:var(--acc);display:block;margin-top:2px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.diff .cs{color:var(--diff-c)}
+.diff .cr{color:var(--diff-bd)}
+.slot.final{background:#FFFF00!important;border-color:#CCA800!important}
+.final .cs{color:#0033FF!important;font-weight:800!important}
+.final .cr{color:#0022CC!important}
+.empty{color:var(--border);font-size:20px;line-height:56px}
+.na{background:var(--border)!important;opacity:.3}
+
+/* ── 범례 ── */
+.legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.ld{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.ld-d{background:var(--diff);border:1.5px solid var(--diff-bd)}
+.lsep{width:1px;height:13px;background:var(--border)}
+.state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:240px;gap:12px;color:var(--muted)}
+.spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── 인쇄 영역 (화면에서는 숨김) ── */
+#printArea{display:none}
+
+@media(max-width:680px){
+  .sb{width:44px;min-width:44px}
+  .sb-hd,.sb-srch{display:none}
+  .ti{padding:9px;justify-content:center}
+  .ti .nm{display:none}
+  .grids{grid-template-columns:1fr}
+}
+
+/* ════════════════════════════════
+   인쇄 스타일
+   ════════════════════════════════ */
+@media print{
+  @page{ size:A4 landscape; margin:6mm 6mm; }
+
+  html,body{ height:auto!important; overflow:visible!important; display:block!important; background:#fff!important; }
+  .sb,.main{ display:none!important; }
+  #printArea{ display:block!important; }
+
+  /* ── 페이지 컨테이너 ── */
+  .pp{
+    break-after:page; page-break-after:always;
+    width:100%; font-family:'Noto Sans KR',sans-serif;
+    display:flex; flex-direction:column; justify-content:space-between;
+    height:calc(210mm - 12mm);
+    box-sizing:border-box;
+    padding:0 14mm;
+  }
+  .pp:last-child{ break-after:auto; page-break-after:auto; }
+  /* 헤더+그리드를 감싸는 블록 — 세로 가운데 배치 */
+  .pp-main{
+    flex:1; display:flex; flex-direction:column;
+    justify-content:center; gap:7px; min-height:0;
+  }
+
+  /* ── 상단 컬러 바 ── */
+  .pp-bar{
+    height:5px; border-radius:2px;
+    background:linear-gradient(90deg,#2C5EE8 0%,#4F7FFF 50%,#06B6D4 100%);
+    margin-bottom:8px; flex-shrink:0;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* ── 헤더 ── */
+  .pp-hd{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:7px; margin-bottom:7px;
+    border-bottom:1.5px solid #E2E8F0; flex-shrink:0;
+  }
+  .pp-hd-left{ display:flex; flex-direction:column; gap:2px; }
+  .pp-name{ font-size:20px; font-weight:700; color:#1B2740; letter-spacing:-.02em; }
+  .pp-school{ font-size:11px; color:#6B7A99; margin-top:1px; }
+  .pp-hd-right{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+  .pp-period{
+    font-size:12px; font-weight:600; color:#065F46;
+    background:#ECFDF5; border:1px solid #A7F3D0;
+    padding:3px 10px; border-radius:20px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-badge{ font-size:11px; font-weight:700; padding:2px 10px; border-radius:12px; }
+  .pp-badge-chg{
+    background:#FFF4E5; color:#92400E; border:1px solid #F59E0B;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-badge-ok{
+    background:#F5F7FB; color:#6B7A99; border:1px solid #DDE3ED;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* ── 그리드 ── */
+  .pp-grids{
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  }
+  .pp-card{
+    border:1.5px solid #DDE3ED; border-radius:8px; overflow:visible!important;
+  }
+  .pp-card-hd{
+    padding:7px 12px; font-size:12px; font-weight:700;
+    letter-spacing:.03em; display:flex; align-items:center; gap:6px;
+    flex-shrink:0;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-hd-b{ background:#EBF3FF!important; color:#1E40AF!important; }
+  .pp-hd-a{ background:#ECFDF5!important; color:#065F46!important; }
+  .pp-date{
+    font-size:10px; font-weight:600; color:#065F46;
+    background:#D1FAE5; border:1px solid #A7F3D0;
+    padding:1px 8px; border-radius:12px; margin-left:8px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-card .tw{ overflow:visible!important; max-width:100%; }
+  .pp-card .tt{ width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed; max-width:100%; }
+  .pp .tt thead th.dy{ min-width:0!important; }
+
+  /* ── 테이블 셀 — 페이지 높이에 맞게 자동 채움 ── */
+  .pp .tt th,.pp .tt td{ border:1px solid #DDE3ED; text-align:center; vertical-align:middle; }
+  .pp .tt thead th{
+    font-size:10px; font-weight:600; color:#6B7A99; padding:5px 3px;
+    background:#F5F7FB!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .tt thead th.dy{
+    background:#EEF2FF!important; color:#2C5EE8!important;
+    font-size:11px; font-weight:700;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .pd{
+    font-size:9px; font-weight:700; color:#6B7A99; padding:0 4px;
+    background:#F5F7FB!important; width:34px; white-space:nowrap;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .slot{ min-width:0!important; width:auto; height:46px; }
+  .pp tr:nth-child(odd) .slot{ background:#fff!important; }
+  .pp tr:nth-child(even) .slot{ background:#F9FAFC!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .pp .ci{ padding:3px 4px; line-height:1.3; }
+  .pp .cs{ font-size:10px; font-weight:600; color:#1B2740; display:block; word-break:keep-all; overflow-wrap:break-word; }
+  .pp .cr{ font-size:9px; font-weight:700; color:#2C5EE8; display:block; margin-top:1px; }
+  .pp .empty{ color:#CBD5E1; font-size:12px; }
+  .pp .pd{ font-size:9px; font-weight:700; color:#6B7A99; padding:0 3px; background:#F5F7FB!important; width:28px; white-space:nowrap; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  /* ── 하이라이트 ── */
+  .pp .slot.diff{
+    background:#FFF4E5!important; border-color:#F59E0B!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .diff .cs{ color:#92400E!important; }
+  .pp .diff .cr{ color:#D97706!important; }
+  .pp .slot.final{
+    background:#FFFF00!important; border-color:#CCA800!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .final .cs{ color:#0033FF!important; font-weight:800!important; }
+  .pp .final .cr{ color:#0022CC!important; }
+  .pp .na{
+    background:#EEF1F6!important; opacity:.6;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* ── 하단 푸터 (범례) ── */
+  .pp-footer{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:6px; padding-top:5px; border-top:1px solid #E2E8F0;
+    flex-shrink:0;
+  }
+  .pp-legend{ display:flex; gap:10px; align-items:center; font-size:10px; color:#6B7A99; }
+  .pp-ld{
+    width:10px; height:10px; border-radius:2px; display:inline-block; vertical-align:middle;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp-lsep{ display:inline-block; width:1px; height:10px; background:#DDE3ED; vertical-align:middle; }
+  .pp-copy{ font-size:10px; color:#A0AABF; }
+}
+</style>
+</head>
+<body>
+
+<div class="sb">
+  <div class="sb-hd">
+    <div class="sb-title">교사</div>
+    <div class="sb-cnt" id="sbCnt">불러오는 중…</div>
+  </div>
+  <div class="sb-srch"><input id="srch" type="text" placeholder="이름 검색…" oninput="renderList()"></div>
+  <div class="sb-filter">
+    <button class="btn-sort" id="btnSort" onclick="toggleSort()">↑ 변경순 정렬</button>
+  </div>
+  <div class="sb-list" id="sbList"></div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="top-name" id="tpName">교사를 선택하세요</div>
+      <div class="top-sub">수능 대비 Final 특강반 — 시간표 변경 전/후 비교</div>
+    </div>
+    <span class="top-badge b-ok" id="tpBadge" hidden></span>
+    <div class="print-btns">
+      <button class="btn-p btn-p-all" onclick="printAll()" title="전체 교사 인쇄">🖨️ 전체 인쇄</button>
+      <button class="btn-p btn-p-cur" onclick="printCurrent()" title="현재 교사 인쇄">🖨️ 현재 교사</button>
+    </div>
+  </div>
+  <div class="content" id="content">
+    <div class="state"><div class="spin"></div><div>데이터를 불러오는 중…</div></div>
+  </div>
+</div>
+
+<!-- 인쇄 전용 영역 -->
+<div id="printArea"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsExXw_6ugNOmS3Xj9HI1iLUy5LMbOQs5QqudzHTlZ79E2_WKkkwg/exec';
+
+const DAYS    = ['월','화','수','목','금'];
+const PERIODS = [7, 6, 6, 7, 6];
+const MAX_P   = 7;
+const DATE_RANGE = '10월 21일(수) ~ 11월 13일(금)';
+
+let DB = {teachers:[], before:{}, after:{}, changed:{}};
+let cur = null;
+
+async function load(){
+  try{
+    const res  = await fetch(SCRIPT_URL);
+    const json = await res.json();
+    DB = json;
+    document.getElementById('sbCnt').textContent = DB.teachers.length + '명';
+    renderList();
+    if(DB.teachers.length) select(DB.teachers[0]);
+  } catch(e){
+    document.getElementById('content').innerHTML =
+      `<div class="state">
+        <div style="font-size:32px">⚠️</div>
+        <div style="text-align:center;line-height:1.8">
+          데이터를 불러오지 못했습니다.<br>
+          <b>SCRIPT_URL</b>을 Apps Script 배포 URL로 교체해주세요.
+        </div>
+      </div>`;
+    document.getElementById('sbCnt').textContent = '오류';
+    console.error(e);
+  }
+}
+
+let sortByChange = false;
+
+function toggleSort(){
+  sortByChange = !sortByChange;
+  const btn = document.getElementById('btnSort');
+  btn.className = 'btn-sort' + (sortByChange ? ' on' : '');
+  btn.textContent = sortByChange ? '↑ 변경순 (해제)' : '↑ 변경순 정렬';
+  renderList();
+}
+
+function hasFinal(name){
+  const after = DB.after[name];
+  if(!after) return false;
+  return Object.values(after).some(c => c && c.s && c.s.includes('FINAL수업'));
+}
+
+function renderList(){
+  const q = document.getElementById('srch').value.trim();
+  let list = DB.teachers.filter(t => t.includes(q));
+  if(sortByChange){
+    list = [...list].sort((a,b) => {
+      const fa = hasFinal(a) ? 2 : (DB.changed&&DB.changed[a]) ? 1 : 0;
+      const fb = hasFinal(b) ? 2 : (DB.changed&&DB.changed[b]) ? 1 : 0;
+      return fb - fa;
+    });
+  }
+  document.getElementById('sbList').innerHTML = list.map(t => {
+    const hasChg  = DB.changed && DB.changed[t];
+    const hasFin  = hasFinal(t);
+    const badges  = (hasChg || hasFin)
+      ? `<span class="badges">${hasChg?'<span class="chg">변경</span>':''}${hasFin?'<span class="fin">FINAL</span>':''}</span>`
+      : '';
+    return `<div class="ti${t===cur?' on':''}" onclick="select('${t}')">
+      <span class="nm">${t}</span>
+      ${badges}
+    </div>`;
+  }).join('');
+}
+
+function buildGrid(sched, diffKeys){
+  let h = `<div class="tw"><table class="tt"><thead>
+    <tr>
+      <th style="background:var(--surface2);width:46px"></th>
+      ${DAYS.map(d => `<th class="dy">${d}요일</th>`).join('')}
+    </tr>
+  </thead><tbody>`;
+
+  for(let p = 1; p <= MAX_P; p++){
+    h += `<tr><td class="pd">${p}교시</td>`;
+    DAYS.forEach((day, di) => {
+      if(p > PERIODS[di]){
+        h += `<td class="slot na"></td>`;
+        return;
+      }
+      const key    = day + p;
+      const cell   = sched ? sched[key] : null;
+      const isDiff  = diffKeys && diffKeys.includes(key);
+      const isFinal = cell && cell.s && cell.s.includes('FINAL수업');
+      if(cell){
+        const cls = ['slot', isDiff?'diff':'', isFinal?'final':''].filter(Boolean).join(' ');
+        const crLines = (cell.r || '').split('\n').filter(Boolean);
+        const crHtml = crLines.map(p=>`<span class="cr">${esc(p)}</span>`).join('');
+        h += `<td class="${cls}"><div class="ci">
+            <span class="cs">${esc(cell.s)}</span>
+            ${crHtml}
+          </div></td>`;
+      } else {
+        h += `<td class="slot${isDiff?' diff':''}"><span class="empty">·</span></td>`;
+      }
+    });
+    h += '</tr>';
+  }
+  return h + '</tbody></table></div>';
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function select(name){
+  cur = name;
+  renderList();
+  const diffs   = (DB.changed && DB.changed[name]) || [];
+  const hasDiff = diffs.length > 0;
+
+  document.getElementById('tpName').textContent = name + ' 선생님';
+  const badge = document.getElementById('tpBadge');
+  badge.hidden = false;
+  badge.className = 'top-badge ' + (hasDiff ? 'b-chg' : 'b-ok');
+  badge.textContent = hasDiff ? `변경 ${diffs.length}개` : '변경 없음';
+
+  document.getElementById('content').innerHTML = `
+    <div class="legend">
+      <span class="ld ld-d"></span><span>변경된 수업</span>
+      <span class="lsep"></span>
+      <span class="ld" style="background:#FFFF00;border:1.5px solid #CCA800"></span><span>FINAL수업</span>
+      <span class="lsep"></span>
+      <span>· 빈 교시</span>
+      <span class="lsep"></span>
+      <span>회색 = 해당 요일에 없는 교시</span>
+    </div>
+    <div class="grids">
+      <div class="card">
+        <div class="card-hd hd-b">◀ 변경 전</div>
+        ${buildGrid(DB.before[name], diffs)}
+      </div>
+      <div class="card">
+        <div class="card-hd hd-a">
+          ▶ 변경 후
+          <span class="date-range">(${DATE_RANGE})</span>
+        </div>
+        ${buildGrid(DB.after[name], diffs)}
+      </div>
+    </div>`;
+}
+
+/* ── 인쇄: 교사 1명분 HTML 생성 ── */
+function buildPrintPage(name){
+  const diffs   = (DB.changed && DB.changed[name]) || [];
+  const hasDiff = diffs.length > 0;
+  const badgeCls = hasDiff ? 'pp-badge-chg' : 'pp-badge-ok';
+  const badgeTxt = hasDiff ? `변경 ${diffs.length}개` : '변경 없음';
+
+  return `<div class="pp">
+    <div class="pp-bar"></div>
+    <div class="pp-main">
+      <div class="pp-hd">
+        <div class="pp-hd-left">
+          <div class="pp-name">${esc(name)} 선생님</div>
+          <div class="pp-school">영생고등학교 — 수능 대비 Final 특강반 시간표 변경 전/후 비교</div>
+        </div>
+        <div class="pp-hd-right">
+          <span class="pp-badge ${badgeCls}">${badgeTxt}</span>
+        </div>
+      </div>
+      <div class="pp-grids">
+        <div class="pp-card">
+          <div class="pp-card-hd pp-hd-b">◀ 변경 전</div>
+          ${buildGrid(DB.before[name], diffs)}
+        </div>
+        <div class="pp-card">
+          <div class="pp-card-hd pp-hd-a">▶ 변경 후 <span class="pp-date">${DATE_RANGE}</span></div>
+          ${buildGrid(DB.after[name], diffs)}
+        </div>
+      </div>
+    </div>
+    <div class="pp-footer">
+      <div class="pp-legend">
+        <span class="pp-ld" style="background:#FFF4E5;border:1px solid #F59E0B"></span>변경된 수업
+        <span class="pp-lsep"></span>
+        <span class="pp-ld" style="background:#FFFF00;border:1px solid #CCA800"></span>FINAL수업
+        <span class="pp-lsep"></span>
+        회색 = 해당 요일에 없는 교시
+      </div>
+      <div class="pp-copy">영생고등학교</div>
+    </div>
+  </div>`;
+}
+
+/* ── 인쇄 직전: 테이블 너비 + 색상 강제 적용 ── */
+window.addEventListener('beforeprint', function(){
+  // 레이아웃
+  document.querySelectorAll('#printArea .pp-card').forEach(function(el){
+    el.style.setProperty('overflow','visible','important');
+  });
+  document.querySelectorAll('#printArea .tw').forEach(function(el){
+    el.style.setProperty('overflow','visible','important');
+    el.style.setProperty('max-width','100%','important');
+  });
+  document.querySelectorAll('#printArea .tt').forEach(function(el){
+    el.style.setProperty('table-layout','fixed','important');
+    el.style.setProperty('width','100%','important');
+    el.style.setProperty('max-width','100%','important');
+  });
+  document.querySelectorAll('#printArea .slot, #printArea thead th').forEach(function(el){
+    el.style.setProperty('min-width','0','important');
+    el.style.setProperty('width','auto','important');
+  });
+  // 변경된 수업 배경색 강제
+  document.querySelectorAll('#printArea .slot.diff').forEach(function(el){
+    el.style.setProperty('background','#FFF4E5','important');
+    el.style.setProperty('border-color','#F59E0B','important');
+    el.style.setProperty('-webkit-print-color-adjust','exact','important');
+    el.style.setProperty('print-color-adjust','exact','important');
+  });
+  document.querySelectorAll('#printArea .diff .cs').forEach(function(el){
+    el.style.setProperty('color','#92400E','important');
+  });
+  document.querySelectorAll('#printArea .diff .cr').forEach(function(el){
+    el.style.setProperty('color','#D97706','important');
+  });
+  // FINAL수업 배경색 강제
+  document.querySelectorAll('#printArea .slot.final').forEach(function(el){
+    el.style.setProperty('background','#FFFF00','important');
+    el.style.setProperty('border-color','#CCA800','important');
+    el.style.setProperty('-webkit-print-color-adjust','exact','important');
+    el.style.setProperty('print-color-adjust','exact','important');
+  });
+  document.querySelectorAll('#printArea .final .cs').forEach(function(el){
+    el.style.setProperty('color','#0033FF','important');
+    el.style.setProperty('font-weight','800','important');
+  });
+  document.querySelectorAll('#printArea .final .cr').forEach(function(el){
+    el.style.setProperty('color','#0022CC','important');
+  });
+});
+window.addEventListener('afterprint', function(){
+  var sel = '#printArea .pp-card, #printArea .tw, #printArea .tt, #printArea .slot, #printArea thead th, #printArea .diff .cs, #printArea .diff .cr, #printArea .final .cs, #printArea .final .cr';
+  ['overflow','max-width','table-layout','width','min-width','background','border-color','-webkit-print-color-adjust','print-color-adjust','color','font-weight'].forEach(function(prop){
+    document.querySelectorAll(sel).forEach(function(el){
+      el.style.removeProperty(prop);
+    });
+  });
+});
+
+function printCurrent(){
+  if(!cur){ alert('교사를 먼저 선택하세요.'); return; }
+  document.getElementById('printArea').innerHTML = buildPrintPage(cur);
+  window.print();
+}
+
+function printAll(){
+  if(!DB.teachers.length){ alert('데이터가 아직 로드되지 않았습니다.'); return; }
+  document.getElementById('printArea').innerHTML = DB.teachers.map(buildPrintPage).join('');
+  window.print();
+}
+
+load();
+</script>
+</body>
+</html>
