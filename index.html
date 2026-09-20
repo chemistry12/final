@@ -57,12 +57,19 @@
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html{
+  height:100%;
+  background:var(--bg);
+}
 body{
   font-family:var(--font);
   background:var(--bg);
   color:var(--text);
   display:flex;height:100%;overflow:hidden;font-size:14px;
+  /* 큰 모니터에서 노트북처럼 제한 */
+  max-width:1540px;
+  margin:0 auto;
+  box-shadow:0 0 0 1px var(--border), 0 4px 40px rgba(79,70,229,.06);
 }
 
 /* ── 사이드바 (글라스모피즘) ── */
@@ -357,12 +364,62 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 /* ── 인쇄 영역 (화면에서는 숨김) ── */
 #printArea{display:none}
 
+/* ── 태블릿 ── */
+@media(max-width:900px){
+  .top-date{ font-size:11px; padding:5px 11px; }
+  .top-name{ font-size:16px; }
+  .btn-p{ padding:6px 10px; font-size:11px; }
+}
+
+/* ── 모바일 ── */
 @media(max-width:680px){
-  .sb{width:46px;min-width:46px}
-  .sb-hd,.sb-srch,.sb-filter{display:none}
-  .ti{padding:9px;justify-content:center;margin:1px 3px}
-  .ti .nm{display:none}
-  .grids{grid-template-columns:1fr}
+  body{ font-size:13px; }
+
+  /* 사이드바 → 하단 탭바로 전환 */
+  .sb{
+    width:100%;min-width:0;height:56px;
+    flex-direction:row;align-items:center;
+    border-right:none;border-top:1px solid rgba(255,255,255,.08);
+    order:2; /* body가 column이 되면 아래로 */
+    overflow-x:auto;overflow-y:hidden;
+  }
+  body{ flex-direction:column; }
+  .main{ order:1; overflow:hidden; }
+  .sb::before{ display:none; }
+  .sb-hd,.sb-srch,.sb-filter{ display:none; }
+  .sb-list{
+    display:flex;flex-direction:row;padding:0 6px;
+    overflow-x:auto;overflow-y:hidden;flex:1;gap:2px;
+    align-items:center;
+  }
+  .sb-list::-webkit-scrollbar{ height:0; }
+  .ti{
+    padding:6px 12px;white-space:nowrap;
+    border-radius:20px;margin:0;
+    font-size:12px;flex-shrink:0;
+  }
+  .ti .badges{ display:none; }
+
+  /* 탑바 모바일 */
+  .topbar{ padding:9px 14px;gap:7px;flex-wrap:wrap; }
+  .top-date{ order:3;width:100%;justify-content:center;font-size:11px;padding:5px 0;border-radius:0;background:none;box-shadow:none;color:var(--acc);font-weight:700; }
+  .top-date-icon{ display:none; }
+  .top-name{ font-size:15px; }
+  .top-sub{ font-size:10px; }
+  .print-btns{ margin-left:auto; }
+  .btn-p-all{ display:none; }
+  .tpBadge-wrap{ order:2; }
+
+  /* 컨텐츠 */
+  .content{ padding:12px 12px; gap:10px; }
+  .grids{ grid-template-columns:1fr; gap:10px; }
+  .slot{ height:50px;min-width:80px; }
+  .tt thead th.dy{ min-width:80px; font-size:11px; }
+  .cs{ font-size:11px; }
+  .cr{ font-size:10px; }
+  .legend{ font-size:10px;gap:8px;padding:8px 12px; }
+  .sc-notes{ padding:8px 12px; }
+  .sc-note-item{ font-size:11px; }
 }
 
 /* ════════════════════════════════
