@@ -25,7 +25,8 @@
   --diff:#FFFBEB; --diff-bd:#F59E0B; --diff-c:#78350F;
   --final:#FFF176; --final-c:#5C3200;
   --sb:#0F0F23;
-  --sb-t:#94A3B8;
+  --sb-t:#D1D5DB;
+  --duty:#BAE6FD; --duty-bd:#38BDF8; --duty-c:#0C4A6E;
   --sb-act:#4F46E5;
   --sb-ho:#1E1B4B;
   --r:12px;
@@ -42,7 +43,8 @@
   --a-hd:#052E16;--a-hd-c:#86EFAC;
   --diff:#1C1400;--diff-bd:#D97706;--diff-c:#FCD34D;
   --final:#3A2800;--final-c:#FFE57F;
-  --sb:#06060F;--sb-t:#64748B;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --sb:#06060F;--sb-t:#CBD5E1;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --duty:#0C3A5A;--duty-bd:#0284C7;--duty-c:#7DD3FC;
 }}
 :root[data-theme="dark"]{
   --bg:#0A0A1A;--surface:#12122A;--surface2:#0F0F22;--surface3:#1A1A38;
@@ -53,7 +55,8 @@
   --a-hd:#052E16;--a-hd-c:#86EFAC;
   --diff:#1C1400;--diff-bd:#D97706;--diff-c:#FCD34D;
   --final:#3A2800;--final-c:#FFE57F;
-  --sb:#06060F;--sb-t:#64748B;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --sb:#06060F;--sb-t:#CBD5E1;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --duty:#0C3A5A;--duty-bd:#0284C7;--duty-c:#7DD3FC;
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -134,8 +137,8 @@ body{
 .sb-list::-webkit-scrollbar{width:3px}
 .sb-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 .ti{
-  padding:8px 12px;font-size:13px;color:var(--sb-t);cursor:pointer;
-  display:flex;align-items:center;gap:7px;
+  padding:8px 12px;font-size:13px;color:#E2E8F0;cursor:pointer;
+  display:flex;align-items:center;gap:7px;font-weight:500;
   transition:all .15s ease;
   border-radius:0;margin:1px 6px;border-radius:8px;
 }
@@ -213,6 +216,11 @@ body{
   border:1px solid var(--border2);
 }
 .btn-p-all:hover{background:var(--surface3);border-color:var(--acc)}
+.btn-p-chg{
+  background:linear-gradient(135deg,#0EA5E9,#0284C7);
+  color:#fff;box-shadow:0 3px 12px rgba(14,165,233,.35);
+}
+.btn-p-chg:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(14,165,233,.45)}
 
 /* ── 컨텐츠 ── */
 .content{
@@ -304,6 +312,9 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 .slot.final{background:#FFFF00!important;border-color:#CCA800!important}
 .final .cs{color:#0033FF!important;font-weight:800!important}
 .final .cr{color:#0022CC!important}
+.slot.duty{background:var(--duty)!important;border-color:var(--duty-bd)!important}
+.duty .cs{color:var(--duty-c)!important;font-weight:700!important}
+.duty .cr{color:var(--duty-c)!important}
 .slot.plus{background:#7CFC00!important;border-color:#3DA800!important}
 .plus .cs{color:#000000!important;font-weight:800!important}
 .plus .cr{color:#1A1A1A!important}
@@ -414,6 +425,7 @@ tr:nth-child(even) .slot{background:var(--surface2)}
   .top-sub{ display:none; }
   .print-btns{ margin-left:auto; }
   .btn-p-all{ display:none; }
+  .btn-p-chg{ font-size:11px;padding:6px 10px; }
   .btn-p-cur{ font-size:11px;padding:6px 10px; }
 
   /* ── 컨텐츠 ── */
@@ -574,6 +586,12 @@ tr:nth-child(even) .slot{background:var(--surface2)}
   }
   .pp .plus .cs{ color:#000000!important; font-weight:800!important; }
   .pp .plus .cr{ color:#1A1A1A!important; }
+  .pp .slot.duty{
+    background:#BAE6FD!important; border-color:#38BDF8!important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .pp .duty .cs{ color:#0C4A6E!important; font-weight:700!important; }
+  .pp .duty .cr{ color:#0C4A6E!important; }
   .pp .na{
     background:#EEF1F6!important; opacity:.6;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
@@ -638,7 +656,7 @@ tr:nth-child(even) .slot{background:var(--surface2)}
   <div class="topbar">
     <div>
       <div class="top-name" id="tpName">교사를 선택하세요</div>
-      <div class="top-sub">수능 대비 Final 특강반 — 시간표 변경 전/후 비교</div>
+      <div class="top-sub" id="topSub"></div>
     </div>
     <span class="top-badge b-ok" id="tpBadge" hidden></span>
     <span class="top-date">
@@ -647,6 +665,7 @@ tr:nth-child(even) .slot{background:var(--surface2)}
     </span>
     <div class="print-btns">
       <button class="btn-p btn-p-all" onclick="printAll()" title="전체 교사 인쇄">🖨️ 전체 인쇄</button>
+      <button class="btn-p btn-p-chg" onclick="printChanged()" title="변경된 교사만 인쇄">🖨️ 변경만</button>
       <button class="btn-p btn-p-cur" onclick="printCurrent()" title="현재 교사 인쇄">🖨️ 현재 교사</button>
     </div>
   </div>
@@ -660,6 +679,9 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsExXw_6ugNOmS3Xj9HI1iLUy5LMbOQs5QqudzHTlZ79E2_WKkkwg/exec';
+
+// ── 제목 (변경 시 여기만 수정) ──
+const TITLE = '수능 대비 Final 특강반';
 
 // ══════════════════════════════════════════════════════════════
 //  인쇄 고정 안내사항 — 모든 교사 인쇄본에 공통으로 표시됩니다.
@@ -680,8 +702,9 @@ const DATE_RANGE = '10월 21일(수) ~ 11월 13일(금)';
 let DB = {teachers:[], before:{}, after:{}, changed:{}};
 let cur = null;
 
-// 탑바 날짜 뱃지 초기화
+// 탑바 초기화
 document.getElementById('topDateLabel').textContent = DATE_RANGE;
+document.getElementById('topSub').textContent = TITLE + ' — 시간표 변경 전/후 비교';
 
 async function load(){
   try{
@@ -764,8 +787,9 @@ function buildGrid(sched, diffKeys){
       const isDiff  = diffKeys && diffKeys.includes(key);
       const isFinal = cell && cell.s && cell.s.includes('FINAL수업');
       const isPlus  = cell && cell.r && cell.r.includes('+');
+      const isDuty  = cell && cell.s && cell.s.includes('자율학습');
       if(cell){
-        const cls = ['slot', isDiff?'diff':'', isFinal?'final':'', isPlus?'plus':''].filter(Boolean).join(' ');
+        const cls = ['slot', isDiff?'diff':'', isFinal?'final':'', isPlus?'plus':'', isDuty?'duty':''].filter(Boolean).join(' ');
         const crLines = (cell.r || '').split('\n').filter(Boolean);
         const crHtml = crLines.map(p=>`<span class="cr">${esc(p)}</span>`).join('');
         h += `<td class="${cls}"><div class="ci">
@@ -813,6 +837,8 @@ function select(name){
       <span class="ld" style="background:#FFFF00;border:1.5px solid #CCA800"></span><span>FINAL수업</span>
       <span class="lsep"></span>
       <span class="ld" style="background:#7CFC00;border:1.5px solid #3DA800"></span><span>대체교사(+)</span>
+      <span class="lsep"></span>
+      <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>자율학습감독</span>
       <span class="lsep"></span>
       <span>· 빈 교시</span>
       <span class="lsep"></span>
@@ -863,7 +889,7 @@ function buildPrintPage(name){
       <div class="pp-hd">
         <div class="pp-hd-left">
           <div class="pp-name">${esc(name)} 선생님</div>
-          <div class="pp-school">영생고등학교 — 수능 대비 Final 특강반 시간표 변경 전/후 비교</div>
+          <div class="pp-school">영생고등학교 — ${esc(TITLE)} 시간표 변경 전/후 비교</div>
         </div>
         <div class="pp-hd-right">
           <span class="pp-badge ${badgeCls}">${badgeTxt}</span>
@@ -888,6 +914,8 @@ function buildPrintPage(name){
         <span class="pp-ld" style="background:#FFFF00;border:1px solid #CCA800"></span>FINAL수업
         <span class="pp-lsep"></span>
         <span class="pp-ld" style="background:#7CFC00;border:1px solid #3DA800"></span>대체교사(+)
+        <span class="pp-lsep"></span>
+        <span class="pp-ld" style="background:#BAE6FD;border:1px solid #38BDF8"></span>자율학습감독
         <span class="pp-lsep"></span>
         회색 = 해당 요일에 없는 교시
       </div>
@@ -956,9 +984,23 @@ window.addEventListener('beforeprint', function(){
   document.querySelectorAll('#printArea .plus .cr').forEach(function(el){
     el.style.setProperty('color','#1A1A1A','important');
   });
+  // 자율학습감독 배경색 강제
+  document.querySelectorAll('#printArea .slot.duty').forEach(function(el){
+    el.style.setProperty('background','#BAE6FD','important');
+    el.style.setProperty('border-color','#38BDF8','important');
+    el.style.setProperty('-webkit-print-color-adjust','exact','important');
+    el.style.setProperty('print-color-adjust','exact','important');
+  });
+  document.querySelectorAll('#printArea .duty .cs').forEach(function(el){
+    el.style.setProperty('color','#0C4A6E','important');
+    el.style.setProperty('font-weight','700','important');
+  });
+  document.querySelectorAll('#printArea .duty .cr').forEach(function(el){
+    el.style.setProperty('color','#0C4A6E','important');
+  });
 });
 window.addEventListener('afterprint', function(){
-  var sel = '#printArea .pp-card, #printArea .tw, #printArea .tt, #printArea .slot, #printArea thead th, #printArea .diff .cs, #printArea .diff .cr, #printArea .final .cs, #printArea .final .cr, #printArea .plus .cs, #printArea .plus .cr';
+  var sel = '#printArea .pp-card, #printArea .tw, #printArea .tt, #printArea .slot, #printArea thead th, #printArea .diff .cs, #printArea .diff .cr, #printArea .final .cs, #printArea .final .cr, #printArea .plus .cs, #printArea .plus .cr, #printArea .duty .cs, #printArea .duty .cr';
   ['overflow','max-width','table-layout','width','min-width','background','border-color','-webkit-print-color-adjust','print-color-adjust','color','font-weight'].forEach(function(prop){
     document.querySelectorAll(sel).forEach(function(el){
       el.style.removeProperty(prop);
@@ -975,6 +1017,17 @@ function printCurrent(){
 function printAll(){
   if(!DB.teachers.length){ alert('데이터가 아직 로드되지 않았습니다.'); return; }
   document.getElementById('printArea').innerHTML = DB.teachers.map(buildPrintPage).join('');
+  window.print();
+}
+
+function printChanged(){
+  if(!DB.teachers.length){ alert('데이터가 아직 로드되지 않았습니다.'); return; }
+  const changed = DB.teachers.filter(name => {
+    const keys = DB.changed[name];
+    return keys && keys.length > 0;
+  });
+  if(!changed.length){ alert('변경된 교사가 없습니다.'); return; }
+  document.getElementById('printArea').innerHTML = changed.map(buildPrintPage).join('');
   window.print();
 }
 
