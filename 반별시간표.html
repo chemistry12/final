@@ -449,6 +449,78 @@ function buildGrid(cn) {
 }
 
 // ════════════════════════════════════════════════
+//  4층 자율학습감독 스케줄 빌드
+// ════════════════════════════════════════════════
+function buildDutySchedule() {
+  const duty = {};
+  DB.teachers.forEach(teacher => {
+    const beforeSched = (DB.before && DB.before[teacher]) || {};
+    const afterSched  = (DB.after  && DB.after[teacher])  || {};
+    const sched = Object.assign({}, beforeSched, afterSched);
+    Object.entries(sched).forEach(([key, cell]) => {
+      if (!cell || !cell.s || !cell.s.includes('자율학습')) return;
+      if (!duty[key]) duty[key] = [];
+      // 담당 반 파싱
+      const classes = parseClasses(cell.r || '');
+      const roomLabel = classes.length > 0
+        ? classes.map(c => c + '반').join('+')
+        : (cell.r || '');
+      duty[key].push({ teacher, roomLabel });
+    });
+  });
+  return duty;
+}
+
+function buildDutyGrid() {
+  const duty = buildDutySchedule();
+  let h = `<div class="tw"><table class="tt"><thead><tr>
+    <th style="background:var(--surface2);width:46px"></th>
+    ${DAYS.map(d => `<th class="dy">${d}요일</th>`).join('')}
+  </tr></thead><tbody>`;
+
+  for (let p = 1; p <= MAX_P; p++) {
+    h += `<tr><td class="pd">${p}교시</td>`;
+    DAYS.forEach((day, di) => {
+      if (p > PERIODS[di]) { h += `<td class="slot na"></td>`; return; }
+      const key = day + p;
+      const entries = duty[key];
+      if (entries && entries.length > 0) {
+        const inner = entries.map(e =>
+          `<div class="ci" style="padding:2px 0">
+            <span class="ct">${esc(e.teacher)} 선생님</span>
+            ${e.roomLabel ? `<span class="cp">${esc(e.roomLabel)}</span>` : ''}
+          </div>`
+        ).join('');
+        h += `<td class="slot duty">${inner}</td>`;
+      } else {
+        h += `<td class="slot"><span class="empty">·</span></td>`;
+      }
+    });
+    h += '</tr>';
+  }
+  return h + '</tbody></table></div>';
+}
+
+// ════════════════════════════════════════════════
+//  4층 선택
+// ════════════════════════════════════════════════
+function selectDuty() {
+  cur = '4층';
+  document.querySelectorAll('.ci-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.c === '4층');
+  });
+  document.getElementById('tpClass').textContent = '4층 자율학습감독';
+  const badge = document.getElementById('tpBadge');
+  badge.className = 'tp-badge'; // 숨김
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="print-header">4층 자율학습감독 — ${TITLE}</div>
+    <div class="print-range">${DATE_RANGE}</div>
+    ${buildDutyGrid()}
+  `;
+}
+
+// ════════════════════════════════════════════════
 //  반 선택
 // ════════════════════════════════════════════════
 function selectClass(n) {
@@ -482,8 +554,7 @@ function selectClass(n) {
 //  사이드바 렌더링
 // ════════════════════════════════════════════════
 function renderSidebar() {
-  document.getElementById('sbList').innerHTML = CLASSES.map(c => {
-    // 이 반에 수업이 하나라도 있으면 표시
+  const classBtns = CLASSES.map(c => {
     const hasSched = Object.keys(CS[c] || {}).length > 0;
     return `<button class="ci-btn${c === cur ? ' on' : ''}"
       data-c="${c}" onclick="selectClass(${c})"
@@ -492,6 +563,18 @@ function renderSidebar() {
       ${c}반
     </button>`;
   }).join('');
+
+  const dutyBtn = `
+    <div style="margin:8px 4px 4px;border-top:1px solid rgba(255,255,255,.1)"></div>
+    <button class="ci-btn${cur === '4층' ? ' on' : ''}"
+      data-c="4층" onclick="selectDuty()"
+      style="font-size:13px;background:${cur==='4층'?'var(--duty-bd)':'rgba(186,230,253,.08)'};
+        color:${cur==='4층'?'#0C4A6E':'#7DD3FC'};"
+      title="4층 자율학습감독 교사">
+      4층
+    </button>`;
+
+  document.getElementById('sbList').innerHTML = classBtns + dutyBtn;
 }
 
 // ════════════════════════════════════════════════
