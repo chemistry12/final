@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>반별 시간표 — 수능 대비 Final 특강반</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+<style>
+/* ── 디자인 토큰 ── */
+:root {
+  --bg:#F0F4FF;
+  --surface:#FFFFFF;
+  --surface2:#F6F8FF;
+  --surface3:#EEF2FF;
+  --border:#E0E7FF;
+  --border2:#C7D2FE;
+  --text:#0F172A;
+  --muted:#64748B;
+  --light:#94A3B8;
+  --acc:#4F46E5;
+  --acc2:#7C3AED;
+  --acc-lt:#EEF2FF;
+  --duty:#BAE6FD; --duty-bd:#38BDF8; --duty-c:#0C4A6E;
+  --sb:#0F0F23;
+  --sb-t:#D1D5DB;
+  --sb-act:#4F46E5;
+  --sb-ho:#1E1B4B;
+  --r:12px;
+  --font:'Noto Sans KR',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A0A1A;--surface:#12122A;--surface2:#0F0F22;--surface3:#1A1A38;
+  --border:#1E1B4B;--border2:#312E81;
+  --text:#E2E8F0;--muted:#94A3B8;--light:#475569;
+  --acc:#818CF8;--acc2:#A78BFA;--acc-lt:#1E1B4B;
+  --sb:#06060F;--sb-t:#CBD5E1;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --duty:#0C3A5A;--duty-bd:#0284C7;--duty-c:#7DD3FC;
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0A1A;--surface:#12122A;--surface2:#0F0F22;--surface3:#1A1A38;
+  --border:#1E1B4B;--border2:#312E81;
+  --text:#E2E8F0;--muted:#94A3B8;--light:#475569;
+  --acc:#818CF8;--acc2:#A78BFA;--acc-lt:#1E1B4B;
+  --sb:#06060F;--sb-t:#CBD5E1;--sb-act:#818CF8;--sb-ho:#0F0F2A;
+  --duty:#0C3A5A;--duty-bd:#0284C7;--duty-c:#7DD3FC;
+}
+
+html{ height:100vh; background:var(--bg); }
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  display:flex; height:100vh; overflow:hidden; font-size:14px;
+  max-width:1540px; margin:0 auto;
+  box-shadow:0 0 0 1px var(--border), 0 4px 40px rgba(79,70,229,.06);
+}
+
+/* ── 사이드바 ── */
+.sb{
+  width:108px; min-width:108px;
+  background:var(--sb);
+  display:flex; flex-direction:column;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.sb-hd{
+  padding:15px 10px 12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-label{ font-size:9px; font-weight:700; color:rgba(255,255,255,.35); letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+.sb-title{ font-size:13px; font-weight:700; color:rgba(255,255,255,.75); }
+.sb-list{ flex:1; overflow-y:auto; padding:8px 6px; display:flex; flex-direction:column; gap:3px; }
+.sb-list::-webkit-scrollbar{ width:3px; }
+.sb-list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.15); border-radius:2px; }
+.ci-btn{
+  display:flex; align-items:center; justify-content:center;
+  padding:10px 6px; font-size:15px; font-weight:700;
+  color:var(--sb-t); cursor:pointer;
+  transition:all .15s ease; border-radius:8px;
+  border:none; background:none; width:100%; letter-spacing:.02em;
+}
+.ci-btn:hover{ background:var(--sb-ho); color:#fff; }
+.ci-btn.on{ background:var(--acc); color:#fff; box-shadow:0 2px 10px rgba(79,70,229,.5); }
+
+/* ── 메인 ── */
+.main{ flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── 상단 바 ── */
+.topbar{
+  padding:13px 20px 11px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  min-height:56px;
+}
+.tp-class{ font-size:22px; font-weight:800; color:var(--text); }
+.tp-badge{
+  font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px;
+  display:none;
+}
+.tp-badge.show{ display:inline-flex; }
+.b-chg{ background:#FEF3C7; color:#92400E; border:1px solid #FCD34D; }
+.b-ok{ background:#F0FDF4; color:#14532D; border:1px solid #BBF7D0; }
+.tp-range{
+  background:var(--acc); color:#fff;
+  font-size:12px; font-weight:700;
+  padding:4px 12px; border-radius:20px;
+}
+.tp-meta{ font-size:11px; color:var(--muted); margin-left:auto; }
+
+/* ── 범례 ── */
+.legend{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 20px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  font-size:12px; color:var(--muted);
+}
+.ld{ width:13px; height:13px; border-radius:3px; display:inline-block; flex-shrink:0; }
+.lsep{ width:1px; height:13px; background:var(--border2); margin:0 2px; }
+
+/* ── 콘텐츠 ── */
+.content{ flex:1; overflow-y:auto; padding:16px 20px; background:var(--bg); }
+.content::-webkit-scrollbar{ width:6px; }
+.content::-webkit-scrollbar-thumb{ background:var(--border2); border-radius:3px; }
+
+/* ── 테이블 ── */
+.tw{ overflow-x:auto; background:var(--surface); border-radius:var(--r); border:1px solid var(--border); box-shadow:0 2px 12px rgba(79,70,229,.06); }
+.tt{ width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed; }
+.tt th,.tt td{ border:1px solid var(--border2); text-align:center; vertical-align:middle; padding:0; }
+.tt thead th{
+  background:var(--surface3); color:var(--muted);
+  font-size:10px; font-weight:700; letter-spacing:.04em; padding:7px 6px; border-top:none;
+}
+.tt thead tr th:first-child{ border-left:none; }
+.tt thead tr th:last-child{ border-right:none; }
+.tt tr td:first-child{ border-left:none; }
+.tt tr td:last-child{ border-right:none; }
+.tt tr:last-child td{ border-bottom:none; }
+.tt thead th.dy{
+  background:linear-gradient(135deg,var(--acc-lt),#E0E7FF);
+  color:var(--acc); font-size:12px; font-weight:800; min-width:130px;
+}
+.pd{
+  background:var(--surface3); color:var(--muted);
+  font-size:10px; font-weight:600; width:44px;
+  padding:0 5px; white-space:nowrap;
+  border-right:2px solid var(--border2)!important;
+}
+
+/* ── 셀 ── */
+.slot{ min-width:130px; position:relative; }
+.slot.na{ background:var(--surface2); }
+.slot .ci{
+  padding:7px 6px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; border-left:3px solid transparent;
+  min-height:60px;
+}
+.cs{ font-size:12px; font-weight:700; color:var(--text); line-height:1.3; }
+.ct{ font-size:11px; font-weight:500; color:var(--muted); line-height:1.2; }
+.cp{ font-size:10px; color:var(--light); line-height:1.2; }
+.empty{ color:var(--light); font-size:16px; }
+
+/* ── 색상 클래스 ── */
+.slot.chg{ background:#FFFBEB!important; }
+.slot.chg .ci{ border-left:3px solid #F59E0B; }
+.chg .cs{ color:#92400E; }
+.chg .ct{ color:#B45309; }
+.chg .cp{ color:#92400E; }
+
+.slot.final{ background:#FFFF00!important; }
+.slot.final .ci{ border-left:3px solid #B45309; }
+.final .cs{ color:#0033FF!important; font-weight:800!important; }
+.final .ct{ color:#0022CC!important; }
+.final .cp{ color:#3344CC; }
+
+.slot.duty{ background:var(--duty)!important; }
+.slot.duty .ci{ border-left:3px solid var(--duty-bd); }
+.duty .cs{ color:var(--duty-c)!important; font-weight:700!important; }
+.duty .ct{ color:var(--duty-c)!important; }
+.duty .cp{ color:var(--duty-c)!important; }
+
+/* FINAL + 변경 겹칠 때: FINAL 우선 */
+.slot.final.chg{ background:#FFFF00!important; }
+.slot.final.chg .ci{ border-left:3px solid #B45309; }
+
+/* ── 상태 ── */
+.state{ display:flex; flex-direction:column; align-items:center; justify-content:center; height:200px; gap:12px; color:var(--muted); font-size:15px; text-align:center; }
+
+/* ── 인쇄 버튼 ── */
+.btn-print{
+  margin-left:auto;
+  font-size:12px; font-weight:700;
+  padding:6px 14px; border-radius:8px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));
+  color:#fff; box-shadow:0 2px 8px rgba(79,70,229,.3);
+  transition:all .15s;
+}
+.btn-print:hover{ transform:translateY(-1px); box-shadow:0 4px 14px rgba(79,70,229,.4); }
+
+/* ── 인쇄 ── */
+@media print{
+  @page{ size:A4 landscape; margin:5mm; }
+  html,body{ height:auto!important; overflow:visible!important; display:block!important; background:#fff!important; max-width:100%!important; }
+  .sb,.topbar,.legend,.btn-print,.btn-print-all,.nav-link{ display:none!important; }
+  /* 현재 반 인쇄 */
+  .main{ display:block!important; overflow:visible!important; }
+  .content{ padding:0!important; background:#fff!important; overflow:visible!important; }
+  .tw{ border:1px solid #ccc!important; box-shadow:none!important; break-inside:avoid; }
+  .tt th,.tt td{ border:1px solid #ccc!important; }
+  .slot.final{ background:#FFFF00!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .slot.duty{ background:#BAE6FD!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .slot.chg{ background:#FFFBEB!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .print-header{ display:block!important; padding:8px 0 6px; font-size:15px; font-weight:800; color:#1E1B4B; }
+  .print-range{ font-size:10px; color:#64748B; margin-bottom:8px; }
+  /* 전체 반 인쇄 모드 */
+  body[data-printmode="all"] .main{ display:none!important; }
+  body[data-printmode="all"] #printAreaAll{ display:block!important; }
+  .print-all-section{ margin-bottom:0; }
+  .print-all-section.pb{ page-break-after:always; break-after:page; }
+  .print-all-cls{ font-size:15px; font-weight:800; color:#1E1B4B; margin-bottom:4px; }
+}
+#printAreaAll{ display:none; }
+.print-header{ display:none; }
+.print-range{ display:none; }
+</style>
+</head>
+<body>
+
+<!-- 사이드바 -->
+<div class="sb">
+  <div class="sb-hd">
+    <div class="sb-label">3학년</div>
+    <div class="sb-title">반 선택</div>
+  </div>
+  <div class="sb-list" id="sbList">
+    <!-- JS로 채움 -->
+  </div>
+</div>
+
+<!-- 메인 -->
+<div class="main">
+  <div class="topbar">
+    <div class="tp-class" id="tpClass">—</div>
+    <span class="tp-badge" id="tpBadge"></span>
+    <div class="tp-range">📅 <span id="tpRange"></span></div>
+    <div class="tp-meta" id="tpMeta">수능 대비 Final 특강반 — 반별 시간표</div>
+    <a class="nav-link" href="index.html" target="_blank"
+      style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;
+        border-radius:8px;background:#1E1B4B;color:#A5B4FC;font-size:12px;
+        font-weight:700;text-decoration:none;border:1px solid #312E81;
+        transition:background .15s;"
+      onmouseover="this.style.background='#312E81'"
+      onmouseout="this.style.background='#1E1B4B'">
+      ← 교사 시간표
+    </a>
+    <button class="btn-print-all" onclick="printAllClasses()"
+      style="font-family:var(--font);font-size:12px;font-weight:700;
+        padding:6px 14px;border-radius:8px;border:none;cursor:pointer;
+        background:#0F172A;color:#94A3B8;transition:all .15s;">
+      🖨️ 전체 반 인쇄
+    </button>
+    <button class="btn-print" onclick="doPrint()">🖨️ 현재 반 인쇄</button>
+  </div>
+
+  <div class="legend">
+    <span class="ld" style="background:#FFFBEB;border:1.5px solid #F59E0B"></span><span>변경된 수업</span>
+    <span class="lsep"></span>
+    <span class="ld" style="background:#FFFF00;border:1.5px solid #CCA800"></span><span>FINAL수업</span>
+    <span class="lsep"></span>
+    <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>자율학습감독</span>
+    <span class="lsep"></span>
+    <span>· 빈 교시</span>
+    <span class="lsep"></span>
+    <span>회색 = 해당 요일에 없는 교시</span>
+  </div>
+
+  <div class="content" id="content">
+    <div class="state">
+      <div style="font-size:36px">⏳</div>
+      <div>시간표 데이터 불러오는 중...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  설정 상수
+// ════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsExXw_6ugNOmS3Xj9HI1iLUy5LMbOQs5QqudzHTlZ79E2_WKkkwg/exec';
+const TITLE      = '수능 대비 Final 특강반';
+const DATE_RANGE = '10월 21일(수) ~ 11월 13일(금)';
+const DAYS       = ['월','화','수','목','금'];
+const PERIODS    = [7, 6, 6, 7, 6];
+const MAX_P      = 7;
+const NUM_CLASSES = 11;
+const CLASSES    = Array.from({length: NUM_CLASSES}, (_, i) => i + 1); // [1..11]
+
+// ════════════════════════════════════════════════
+//  상태
+// ════════════════════════════════════════════════
+let DB  = null;
+// CS: { classNum: { "월1": [{teacher, subject, isFinal, isDuty, isChanged, partners:[]}] } }
+let CS  = {};
+let cur = 1;
+
+// ════════════════════════════════════════════════
+//  r 필드 → 반 번호 배열 파싱
+// ════════════════════════════════════════════════
+function parseClasses(r) {
+  if (!r) return [];
+
+  // "N반" 패턴 — 줄바꿈과 무관하게 전체 문자열에서 검색
+  // "3반+4반", "8반\n7반", "10반+11반" 등 모두 처리
+  const banMatches = r.match(/(\d+)반/g);
+  if (banMatches) {
+    const result = [];
+    banMatches.forEach(m => {
+      const n = parseInt(m.match(/\d+/)[0]);
+      if (n >= 1 && n <= NUM_CLASSES && !result.includes(n)) result.push(n);
+    });
+    if (result.length > 0) return result;
+  }
+
+  // 교실 번호 3XX → 3학년 XX반 (예: "303" → 3반, "310" → 10반)
+  const rooms = [];
+  r.split('\n').forEach(line => {
+    const rm = line.trim().match(/^3(0[1-9]|1[01])$/);
+    if (rm) {
+      const n = parseInt(rm[1]);
+      if (n >= 1 && n <= NUM_CLASSES && !rooms.includes(n)) rooms.push(n);
+    }
+  });
+  if (rooms.length > 0) return rooms;
+
+  return [];
+}
+
+// ════════════════════════════════════════════════
+//  교사 스케줄 → 반별 스케줄 역매핑
+// ════════════════════════════════════════════════
+function buildCS() {
+  const cs = {};
+  CLASSES.forEach(c => { cs[c] = {}; });
+
+  DB.teachers.forEach(teacher => {
+    // before를 기본으로 깔고, after로 덮어쓰기 → 변경 없는 교사도 포함
+    const beforeSched = (DB.before && DB.before[teacher]) || {};
+    const afterSched  = (DB.after  && DB.after[teacher])  || {};
+    const sched = Object.assign({}, beforeSched, afterSched);
+    if (!Object.keys(sched).length) return;
+
+    Object.entries(sched).forEach(([key, cell]) => {
+      if (!cell) return;
+
+      const classes = parseClasses(cell.r || '');
+      if (!classes.length) return;
+
+      const isDuty    = !!(cell.s && cell.s.includes('자율학습'));
+      const isFinal   = !!(cell.s && cell.s.includes('FINAL수업'));
+      const isChanged = !!(DB.changed && DB.changed[teacher] && DB.changed[teacher].includes(key));
+
+      classes.forEach(cn => {
+        if (!cs[cn][key]) cs[cn][key] = [];
+        cs[cn][key].push({
+          teacher,
+          subject:  cell.s || '',
+          isDuty, isFinal, isChanged,
+          partners: classes.filter(c => c !== cn)  // 합반 상대 반 번호들
+        });
+      });
+    });
+  });
+
+  return cs;
+}
+
+// ════════════════════════════════════════════════
+//  HTML 이스케이프
+// ════════════════════════════════════════════════
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// ════════════════════════════════════════════════
+//  시간표 그리드 생성
+// ════════════════════════════════════════════════
+function buildGrid(cn) {
+  const sched = CS[cn] || {};
+
+  let h = `<div class="tw"><table class="tt">
+    <thead><tr>
+      <th style="background:var(--surface2);width:46px"></th>
+      ${DAYS.map(d => `<th class="dy">${d}요일</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  for (let p = 1; p <= MAX_P; p++) {
+    h += `<tr><td class="pd">${p}교시</td>`;
+
+    DAYS.forEach((day, di) => {
+      if (p > PERIODS[di]) {
+        h += `<td class="slot na"></td>`;
+        return;
+      }
+
+      const key     = day + p;
+      const entries = sched[key];
+
+      if (entries && entries.length > 0) {
+        // 같은 시간에 여러 교사가 있을 경우 모두 표시 (보통은 1명)
+        const e = entries[0];
+
+        const cls = ['slot',
+          (e.isChanged && !e.isFinal) ? 'chg'  : '',
+          e.isFinal                   ? 'final' : '',
+          e.isDuty                    ? 'duty'  : ''
+        ].filter(Boolean).join(' ');
+
+        // 합반 표시 (e.g. "+4반 합반")
+        const partnerTxt = e.partners.length > 0
+          ? `<span class="cp">+${e.partners.join('·')}반 합반</span>`
+          : '';
+
+        // 복수 교사인 경우 (드문 케이스)
+        const extraTeachers = entries.slice(1).map(ex =>
+          `<span class="ct">${esc(ex.teacher)} 선생님</span>`
+        ).join('');
+
+        h += `<td class="${cls}">
+          <div class="ci">
+            <span class="cs">${esc(e.subject)}</span>
+            <span class="ct">${esc(e.teacher)} 선생님</span>
+            ${partnerTxt}
+            ${extraTeachers}
+          </div>
+        </td>`;
+      } else {
+        h += `<td class="slot"><span class="empty">·</span></td>`;
+      }
+    });
+
+    h += '</tr>';
+  }
+
+  return h + '</tbody></table></div>';
+}
+
+// ════════════════════════════════════════════════
+//  반 선택
+// ════════════════════════════════════════════════
+function selectClass(n) {
+  cur = n;
+
+  // 사이드바 버튼 갱신
+  document.querySelectorAll('.ci-btn').forEach(b => {
+    b.classList.toggle('on', parseInt(b.dataset.c) === n);
+  });
+
+  // 헤더 갱신
+  document.getElementById('tpClass').textContent = n + '반';
+
+  // 변경 수 뱃지
+  const sched = CS[n] || {};
+  const changedCount = Object.values(sched).flat().filter(e => e.isChanged).length;
+  const badge = document.getElementById('tpBadge');
+  badge.textContent  = changedCount > 0 ? `변경 ${changedCount}개` : '변경 없음';
+  badge.className    = 'tp-badge show ' + (changedCount > 0 ? 'b-chg' : 'b-ok');
+
+  // 그리드 렌더링
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="print-header">${n}반 시간표 — ${TITLE}</div>
+    <div class="print-range">${DATE_RANGE}</div>
+    ${buildGrid(n)}
+  `;
+}
+
+// ════════════════════════════════════════════════
+//  사이드바 렌더링
+// ════════════════════════════════════════════════
+function renderSidebar() {
+  document.getElementById('sbList').innerHTML = CLASSES.map(c => {
+    // 이 반에 수업이 하나라도 있으면 표시
+    const hasSched = Object.keys(CS[c] || {}).length > 0;
+    return `<button class="ci-btn${c === cur ? ' on' : ''}"
+      data-c="${c}" onclick="selectClass(${c})"
+      title="${hasSched ? c + '반' : c + '반 (데이터 없음)'}"
+      style="${hasSched ? '' : 'opacity:.4'}">
+      ${c}반
+    </button>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+//  인쇄 — 현재 반
+// ════════════════════════════════════════════════
+function doPrint() {
+  document.body.removeAttribute('data-printmode');
+  window.print();
+}
+
+// ════════════════════════════════════════════════
+//  인쇄 — 전체 반 (1반~11반, A4 가로 반별 1페이지)
+// ════════════════════════════════════════════════
+function printAllClasses() {
+  const area = document.getElementById('printAreaAll');
+  let html = '';
+  CLASSES.forEach((cn, i) => {
+    const isLast = (i === CLASSES.length - 1);
+    html += `
+      <div class="print-all-section${isLast ? '' : ' pb'}">
+        <div class="print-all-cls">${cn}반 시간표 — ${TITLE}&nbsp;&nbsp;<span style="font-size:10px;font-weight:400;color:#64748B">${DATE_RANGE}</span></div>
+        ${buildGrid(cn)}
+      </div>`;
+  });
+  area.innerHTML = html;
+  document.body.dataset.printmode = 'all';
+  window.print();
+  // 복원
+  setTimeout(() => {
+    document.body.removeAttribute('data-printmode');
+    area.innerHTML = '';
+  }, 500);
+}
+
+// ════════════════════════════════════════════════
+//  데이터 로드
+// ════════════════════════════════════════════════
+async function load() {
+  document.getElementById('tpRange').textContent = DATE_RANGE;
+
+  try {
+    const res  = await fetch(SCRIPT_URL);
+    const json = await res.json();
+    DB = json;
+
+    CS = buildCS();
+    renderSidebar();
+    selectClass(1);
+
+  } catch (e) {
+    console.error('반별시간표 오류:', e);
+    document.getElementById('content').innerHTML = `
+      <div class="state">
+        <div style="font-size:36px">⚠️</div>
+        <div style="line-height:1.8">
+          데이터를 불러오지 못했습니다.<br>
+          <small style="font-size:12px;color:var(--light)">${e.message || '네트워크 오류'}</small><br>
+          <button onclick="load()"
+            style="margin-top:10px;padding:7px 18px;border-radius:8px;border:none;
+            background:var(--acc);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+            🔄 다시 시도
+          </button>
+        </div>
+      </div>`;
+  }
+}
+
+load();
+</script>
+
+<!-- 전체 반 인쇄용 영역 -->
+<div id="printAreaAll"></div>
+</body>
+</html>
