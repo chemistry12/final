@@ -609,7 +609,7 @@ tr:nth-child(even) .slot{background:var(--surface2)}
   </div>
   <div class="sb-srch"><input id="srch" type="text" placeholder="이름 검색…" oninput="renderList()"></div>
   <div class="sb-filter">
-    <button class="btn-sort" id="btnSort" onclick="toggleSort()">↑ 변경순 정렬</button>
+    <button class="btn-sort on" id="btnSort" onclick="toggleSort()">↑ 변경순 (해제)</button>
   </div>
   <div class="sb-list" id="sbList"></div>
 </div>
@@ -685,7 +685,7 @@ async function load(){
   }
 }
 
-let sortByChange = false;
+let sortByChange = true;
 
 function toggleSort(){
   sortByChange = !sortByChange;
