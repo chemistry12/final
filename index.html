@@ -675,6 +675,15 @@ tr:nth-child(even) .slot{background:var(--surface2)}
       <span id="topDateLabel"></span>
     </span>
     <div class="print-btns">
+      <a href="반별시간표.html" target="_blank"
+        style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+          border-radius:8px;background:#1E1B4B;color:#A5B4FC;font-size:12px;
+          font-weight:700;text-decoration:none;border:1px solid #312E81;
+          transition:background .15s;"
+        onmouseover="this.style.background='#312E81'"
+        onmouseout="this.style.background='#1E1B4B'">
+        📋 반별 시간표
+      </a>
       <button class="btn-p btn-p-all" onclick="printAll()" title="전체 교사 인쇄">🖨️ 전체 인쇄</button>
       <button class="btn-p btn-p-chg" onclick="printChanged()" title="변경된 교사만 인쇄">🖨️ 변경만</button>
       <button class="btn-p btn-p-cur" onclick="printCurrent()" title="현재 교사 인쇄">🖨️ 현재 교사</button>
