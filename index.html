@@ -248,11 +248,11 @@ body{
 }
 .hd-b{
   background:linear-gradient(135deg,#EEF2FF,#E0E7FF);
-  color:#3730A3;border-bottom:1px solid #C7D2FE;
+  color:#3730A3;border-bottom:2px solid #C7D2FE;
 }
 .hd-a{
   background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
-  color:#14532D;border-bottom:1px solid #BBF7D0;
+  color:#14532D;border-bottom:2px solid #BBF7D0;
 }
 /* 카드 헤더 날짜 뱃지 */
 .date-range{
@@ -279,27 +279,32 @@ body{
 /* ── 시간표 테이블 ── */
 .tw{overflow-x:auto}
 .tt{border-collapse:collapse;width:100%;font-size:12px}
-.tt th,.tt td{border:1px solid var(--border);text-align:center;vertical-align:middle;padding:0}
+.tt th,.tt td{border:1px solid var(--border2);text-align:center;vertical-align:middle;padding:0}
 .tt thead th{
-  background:var(--surface2);color:var(--muted);
+  background:var(--surface3);color:var(--muted);
   font-size:10px;font-weight:700;letter-spacing:.04em;padding:7px 6px;
+  border-top:none;
 }
+.tt thead tr:first-child th:first-child{ border-left:none; }
+.tt thead tr:first-child th:last-child{ border-right:none; }
+.tt tr td:first-child{ border-left:none; }
+.tt tr td:last-child{ border-right:none; }
+.tt tr:last-child td{ border-bottom:none; }
 .tt thead th.dy{
   background:linear-gradient(135deg,var(--acc-lt),#E0E7FF);
   color:var(--acc);font-size:12px;font-weight:800;min-width:110px;
 }
 .pd{
-  background:var(--surface2);color:var(--light);
-  font-size:10px;font-weight:700;width:44px;
+  background:var(--surface3);color:var(--muted);
+  font-size:10px;font-weight:600;width:44px;
   padding:0 5px;white-space:nowrap;
+  border-right:2px solid var(--border2)!important;
 }
 .slot{height:58px;min-width:110px;transition:background .15s}
 tr:nth-child(odd) .slot{background:var(--surface)}
 tr:nth-child(even) .slot{background:var(--surface2)}
-.slot.diff{
-  background:linear-gradient(135deg,#FFFBEB,#FEF3C7)!important;
-  border-color:#FDE68A!important;
-}
+.slot.diff{ background:#FFFBEB!important; }
+.slot.diff .ci{ border-left:3px solid #F59E0B; }
 .ci{padding:5px 8px;line-height:1.4}
 .cs{font-weight:700;font-size:12px;color:var(--text);display:block}
 .cr{
@@ -309,15 +314,18 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 }
 .diff .cs{color:#92400E}
 .diff .cr{color:#B45309}
-.slot.final{background:#FFFF00!important;border-color:#CCA800!important}
+.slot.final{ background:#FFFF00!important; }
+.slot.final .ci{ border-left:3px solid #B45309; }
 .final .cs{color:#0033FF!important;font-weight:800!important}
 .final .cr{color:#0022CC!important}
-.slot.duty{background:var(--duty)!important;border-color:var(--duty-bd)!important}
+.slot.duty{ background:var(--duty)!important; }
+.slot.duty .ci{ border-left:3px solid var(--duty-bd); }
 .duty .cs{color:var(--duty-c)!important;font-weight:700!important}
 .duty .cr{color:var(--duty-c)!important}
-.slot.plus{background:#7CFC00!important;border-color:#3DA800!important}
-.plus .cs{color:#000000!important;font-weight:800!important}
-.plus .cr{color:#1A1A1A!important}
+.slot.plus{ background:#7CFC00!important; }
+.slot.plus .ci{ border-left:3px solid #22A600; }
+.plus .cs{color:#003800!important;font-weight:800!important}
+.plus .cr{color:#1A4400!important}
 .empty{color:var(--border2);font-size:18px;line-height:58px}
 .na{background:var(--border)!important;opacity:.25}
 
@@ -569,27 +577,30 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 
   /* ── 하이라이트 ── */
   .pp .slot.diff{
-    background:#FFFBEB!important; border-color:#FDE68A!important;
+    background:#FFFBEB!important;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
   .pp .diff .cs{ color:#92400E!important; font-weight:800!important; }
   .pp .diff .cr{ color:#B45309!important; font-weight:800!important; }
   .pp .slot.final{
-    background:#FFFF00!important; border-color:#CCA800!important;
+    background:#FFFF00!important;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
+  .pp .slot.final .ci{ border-left:3px solid #B45309; }
   .pp .final .cs{ color:#0033FF!important; font-weight:800!important; }
   .pp .final .cr{ color:#0022CC!important; }
   .pp .slot.plus{
-    background:#7CFC00!important; border-color:#3DA800!important;
+    background:#7CFC00!important;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
-  .pp .plus .cs{ color:#000000!important; font-weight:800!important; }
-  .pp .plus .cr{ color:#1A1A1A!important; }
+  .pp .slot.plus .ci{ border-left:3px solid #22A600; }
+  .pp .plus .cs{ color:#003800!important; font-weight:800!important; }
+  .pp .plus .cr{ color:#1A4400!important; }
   .pp .slot.duty{
-    background:#BAE6FD!important; border-color:#38BDF8!important;
+    background:#BAE6FD!important;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
+  .pp .slot.duty .ci{ border-left:3px solid #38BDF8; }
   .pp .duty .cs{ color:#0C4A6E!important; font-weight:700!important; }
   .pp .duty .cr{ color:#0C4A6E!important; }
   .pp .na{
