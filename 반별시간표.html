@@ -50,10 +50,25 @@ body{
   font-family:var(--font);
   background:var(--bg);
   color:var(--text);
-  display:flex; height:100vh; overflow:hidden; font-size:14px;
+  display:flex;flex-direction:column; height:100vh; overflow:hidden; font-size:14px;
   max-width:1540px; margin:0 auto;
   box-shadow:0 0 0 1px var(--border), 0 4px 40px rgba(79,70,229,.06);
 }
+/* ── 공통 네비게이션 바 ── */
+.site-nav{
+  display:flex;align-items:center;gap:2px;
+  background:#06060F;border-bottom:1px solid rgba(255,255,255,.1);
+  padding:0 10px;flex-shrink:0;height:36px;
+}
+.snav-tab{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 13px;border-radius:6px;
+  font-size:12px;font-weight:700;color:#64748B;
+  text-decoration:none;transition:all .12s;white-space:nowrap;
+}
+.snav-tab:hover{background:rgba(255,255,255,.06);color:#C7D2FE;}
+.snav-tab.cur{background:#312E81;color:#A5B4FC;}
+.app-inner{flex:1;display:flex;overflow:hidden;min-height:0;}
 
 /* ── 사이드바 ── */
 .sb{
@@ -233,6 +248,13 @@ body{
 </head>
 <body>
 
+<nav class="site-nav">
+  <a href="index.html" class="snav-tab">👨‍🏫 교사 시간표</a>
+  <a href="반별시간표.html" class="snav-tab cur">📅 반별 시간표</a>
+  <a href="파이널출석안내.html" class="snav-tab">✅ Final 출석 안내</a>
+</nav>
+
+<div class="app-inner">
 <!-- 사이드바 -->
 <div class="sb">
   <div class="sb-hd">
@@ -649,24 +671,20 @@ function startTimer(updateFn) {
   return () => clearInterval(iv);
 }
 
-async function fetchWithRetry(url, maxTry = 3, timeout = 45000) {
+async function fetchWithRetry(url, maxTry = 3) {
   let lastErr;
   for (let i = 1; i <= maxTry; i++) {
-    const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), timeout);
     try {
-      const res  = await fetch(url, { signal: ctrl.signal });
-      clearTimeout(tid);
+      const res  = await fetch(url);
       const text = await res.text();
       if (text.trimStart()[0] !== '{' && text.trimStart()[0] !== '[') {
         throw new Error('서버에서 JSON 대신 HTML을 반환했습니다 (Apps Script 인증 필요)');
       }
       return JSON.parse(text);
     } catch(e) {
-      clearTimeout(tid);
       lastErr = e;
       if (i < maxTry) {
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 4000));
       }
     }
   }
@@ -721,5 +739,6 @@ load();
 
 <!-- 전체 반 인쇄용 영역 -->
 <div id="printAreaAll"></div>
+</div><!-- /.app-inner -->
 </body>
 </html>
