@@ -671,20 +671,26 @@ function startTimer(updateFn) {
   return () => clearInterval(iv);
 }
 
-async function fetchWithRetry(url, maxTry = 3) {
+async function fetchWithRetry(url, maxTry = 2, timeout = 90000) {
   let lastErr;
   for (let i = 1; i <= maxTry; i++) {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), timeout);
     try {
-      const res  = await fetch(url);
+      const res  = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(tid);
       const text = await res.text();
       if (text.trimStart()[0] !== '{' && text.trimStart()[0] !== '[') {
-        throw new Error('서버에서 JSON 대신 HTML을 반환했습니다 (Apps Script 인증 필요)');
+        throw new Error('Apps Script가 HTML을 반환했습니다. 잠시 후 재시도해주세요.');
       }
       return JSON.parse(text);
     } catch(e) {
-      lastErr = e;
+      clearTimeout(tid);
+      lastErr = (e.name === 'AbortError')
+        ? new Error('Apps Script 응답 시간 초과 (콜드 스타트). 재시도 버튼을 눌러주세요.')
+        : e;
       if (i < maxTry) {
-        await new Promise(r => setTimeout(r, 4000));
+        await new Promise(r => setTimeout(r, 2000));
       }
     }
   }
