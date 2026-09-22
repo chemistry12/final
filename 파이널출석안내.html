@@ -13,6 +13,20 @@
 * { box-sizing:border-box; margin:0; padding:0; }
 body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
        background:var(--bg); color:var(--text); min-height:100vh; }
+/* ── 공통 네비게이션 바 ── */
+.site-nav{
+  display:flex;align-items:center;gap:2px;
+  background:#06060F;border-bottom:1px solid rgba(255,255,255,.1);
+  padding:0 10px;height:36px;
+}
+.snav-tab{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 13px;border-radius:6px;
+  font-size:12px;font-weight:700;color:#64748B;
+  text-decoration:none;transition:all .12s;white-space:nowrap;
+}
+.snav-tab:hover{background:rgba(255,255,255,.06);color:#C7D2FE;}
+.snav-tab.cur{background:#312E81;color:#A5B4FC;}
 
 /* ── 상단바 ── */
 .topbar {
@@ -177,6 +191,12 @@ table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
 </head>
 <body>
 
+<nav class="site-nav">
+  <a href="index.html" class="snav-tab">👨‍🏫 교사 시간표</a>
+  <a href="반별시간표.html" class="snav-tab">📅 반별 시간표</a>
+  <a href="파이널출석안내.html" class="snav-tab cur">✅ Final 출석 안내</a>
+</nav>
+
 <div class="topbar">
   <h1>📋 Final 특강 출석 안내</h1>
   <span class="sub" id="dateRange"></span>
@@ -231,24 +251,20 @@ function startTimer(updateFn) {
   return () => clearInterval(iv);
 }
 
-async function fetchWithRetry(url, maxTry = 3, timeout = 45000) {
+async function fetchWithRetry(url, maxTry = 3) {
   let lastErr;
   for (let i = 1; i <= maxTry; i++) {
-    const ctrl = new AbortController();
-    const tid  = setTimeout(() => ctrl.abort(), timeout);
     try {
-      const res  = await fetch(url, { signal: ctrl.signal });
-      clearTimeout(tid);
+      const res  = await fetch(url);
       const text = await res.text();
       if (text.trimStart()[0] !== '{' && text.trimStart()[0] !== '[') {
         throw new Error('서버에서 JSON 대신 HTML을 반환했습니다 (Apps Script 인증 필요)');
       }
       return JSON.parse(text);
     } catch(e) {
-      clearTimeout(tid);
       lastErr = e;
       if (i < maxTry) {
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 4000));
       }
     }
   }
