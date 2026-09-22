@@ -73,20 +73,6 @@ body{
   margin:0 auto;
   box-shadow:0 0 0 1px var(--border), 0 4px 40px rgba(79,70,229,.06);
 }
-/* ── 공통 네비게이션 바 ── */
-.site-nav{
-  display:flex;align-items:center;gap:2px;
-  background:#06060F;border-bottom:1px solid rgba(255,255,255,.1);
-  padding:0 10px;flex-shrink:0;height:36px;
-}
-.snav-tab{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:4px 13px;border-radius:6px;
-  font-size:12px;font-weight:700;color:#64748B;
-  text-decoration:none;transition:all .12s;white-space:nowrap;
-}
-.snav-tab:hover{background:rgba(255,255,255,.06);color:#C7D2FE;}
-.snav-tab.cur{background:#312E81;color:#A5B4FC;}
 .app-inner{flex:1;display:flex;overflow:hidden;min-height:0;}
 
 /* ── 사이드바 (글라스모피즘) ── */
@@ -482,8 +468,6 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 @media print{
   @page{ size:A4 landscape; margin:6mm 6mm; }
 
-  .site-nav{ display:none!important; }
-
   html,body{ height:auto!important; overflow:visible!important; display:block!important; background:#fff!important; }
   .sb,.main{ display:none!important; }
   #printArea{ display:block!important; }
@@ -664,12 +648,6 @@ tr:nth-child(even) .slot{background:var(--surface2)}
 </head>
 <body>
 
-<nav class="site-nav">
-  <a href="index.html" class="snav-tab cur">👨‍🏫 교사 시간표</a>
-  <a href="반별시간표.html" class="snav-tab">📅 반별 시간표</a>
-  <a href="파이널출석안내.html" class="snav-tab">✅ Final 출석 안내</a>
-</nav>
-
 <div class="app-inner">
 <div class="sb">
   <div class="sb-hd">
@@ -706,6 +684,15 @@ tr:nth-child(even) .slot{background:var(--surface2)}
         onmouseover="this.style.background='#312E81'"
         onmouseout="this.style.background='#1E1B4B'">
         📋 반별 시간표
+      </a>
+      <a href="파이널출석안내.html" target="_blank"
+        style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+          border-radius:8px;background:#1A2E1A;color:#86EFAC;font-size:12px;
+          font-weight:700;text-decoration:none;border:1px solid #166534;
+          transition:background .15s;"
+        onmouseover="this.style.background='#14532D'"
+        onmouseout="this.style.background='#1A2E1A'">
+        ✅ FINAL출석
       </a>
       <button class="btn-p btn-p-all" onclick="printAll()" title="전체 교사 인쇄">🖨️ 전체 인쇄</button>
       <button class="btn-p btn-p-chg" onclick="printChanged()" title="변경된 교사만 인쇄">🖨️ 변경만</button>
