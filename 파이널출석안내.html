@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Final 특강 출석 안내</title>
+<style>
+:root {
+  --bg:#F8FAFC; --card:#FFF; --border:#E2E8F0;
+  --text:#1E293B; --muted:#64748B; --light:#94A3B8;
+  --accent:#4F46E5; --accent-light:#EEF2FF;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
+       background:var(--bg); color:var(--text); min-height:100vh; }
+
+/* ── 상단바 ── */
+.topbar {
+  background:#1E1B4B; color:#A5B4FC;
+  padding:10px 16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.topbar h1 { font-size:15px; font-weight:800; color:#fff; flex:1; min-width:180px; }
+.topbar .sub { font-size:11px; color:#818CF8; }
+.btn-link {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:6px 12px; border-radius:7px;
+  background:#312E81; color:#A5B4FC;
+  font-size:12px; font-weight:700; text-decoration:none; border:none; cursor:pointer;
+  border:1px solid #3730A3; transition:background .15s;
+}
+.btn-link:hover { background:#3730A3; }
+.btn-print { background:#1E3A5F; color:#93C5FD; border-color:#1E40AF; }
+.btn-print:hover { background:#1E40AF; }
+
+/* ── 반 선택 탭 ── */
+.class-tabs {
+  background:#fff; border-bottom:2px solid var(--border);
+  padding:8px 16px 0; display:flex; gap:4px; flex-wrap:wrap;
+}
+.cls-tab {
+  padding:6px 14px; border-radius:8px 8px 0 0;
+  font-size:13px; font-weight:700; cursor:pointer;
+  border:1px solid transparent; border-bottom:none;
+  color:var(--muted); background:transparent; transition:all .15s;
+}
+.cls-tab:hover { background:#F1F5F9; color:var(--text); }
+.cls-tab.active {
+  background:#fff; color:var(--accent);
+  border-color:var(--border); border-bottom:2px solid #fff;
+  margin-bottom:-2px;
+}
+.cls-tab.has-absent { color:#D97706; }
+.cls-tab.active.has-absent { color:#B45309; }
+
+/* ── 메인 ── */
+.main { padding:16px; }
+.loading { text-align:center; padding:60px; color:var(--muted); font-size:14px; }
+.error-msg { text-align:center; padding:40px; color:#DC2626; font-size:13px; }
+
+/* 반 헤더 */
+.class-header-bar {
+  display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;
+}
+.class-title { font-size:20px; font-weight:900; color:var(--text); }
+.class-subtitle { font-size:12px; color:var(--muted); }
+.total-badge {
+  margin-left:auto; padding:4px 12px; border-radius:20px;
+  font-size:12px; font-weight:700;
+  background:#FEF3C7; color:#92400E; border:1px solid #FCD34D;
+}
+.total-badge.zero { background:#F1F5F9; color:#94A3B8; border-color:#E2E8F0; }
+
+/* 시간표 테이블 */
+.tt-wrap { overflow-x:auto; }
+table.tt {
+  border-collapse:collapse; width:100%; min-width:600px;
+  table-layout:fixed;
+  background:var(--card); border-radius:10px; overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+table.tt th, table.tt td {
+  border:1px solid var(--border); padding:6px 8px; vertical-align:top;
+  width:calc((100% - 56px) / 5);
+}
+table.tt thead th {
+  background:#1E1B4B; color:#C7D2FE; font-size:12px; font-weight:800;
+  text-align:center; padding:8px;
+}
+table.tt thead th.period-head {
+  background:#312E81; color:#A5B4FC; width:56px; font-size:11px;
+}
+table.tt tbody td.period-cell {
+  background:#F8FAFC; text-align:center;
+  font-size:13px; font-weight:800; color:var(--muted); width:56px;
+}
+table.tt tbody tr:hover td { background:#FAFAFE; }
+table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
+
+/* 셀 내부 학생 카드 */
+.cell-inner { min-height:36px; }
+.no-absent { color:#94A3B8; font-size:11px; text-align:center; padding:8px 0; }
+
+.student-chip {
+  display:flex; align-items:center; gap:4px;
+  padding:3px 6px; margin:2px 0; border-radius:6px;
+  background:#FEF3C7; border-left:3px solid #D97706;
+}
+.chip-num { font-size:11px; font-weight:800; color:#7C2D12; min-width:20px; text-align:right; white-space:nowrap; }
+.chip-name { font-size:12px; font-weight:900; color:#7C2D12; white-space:nowrap; }
+.chip-sub {
+  font-size:10px; font-weight:800; padding:1px 5px;
+  border-radius:8px; white-space:nowrap;
+}
+
+/* 과목 색 — 인쇄에서도 잘 보이도록 진하게 */
+.sub-국어    { background:#C4B5FD; color:#3B0764; }
+.sub-영어    { background:#6EE7B7; color:#064E3B; }
+.sub-수학    { background:#FCA5A5; color:#7F1D1D; }
+.sub-확통    { background:#FCD34D; color:#713F12; }
+.sub-사문    { background:#F9A8D4; color:#500724; }
+.sub-생윤    { background:#7DD3FC; color:#0C2A4A; }
+.sub-세지    { background:#86EFAC; color:#14532D; }
+
+/* ── 인쇄 ── */
+@media print {
+  @page { size: A4 landscape; margin:10mm; }
+
+  .topbar, .class-tabs, .student-list-section { display:none !important; }
+  .main { padding:0; }
+  body { background:#fff; }
+
+  /* 인쇄 헤더 */
+  .print-header { display:block !important; font-size:12px; margin-bottom:5px; }
+  .class-header-bar { margin-bottom:5px; }
+  .class-title { font-size:14px; }
+  .class-subtitle, .total-badge { font-size:10px; }
+
+  /* 테이블 압축 */
+  .tt-wrap { overflow:visible; }
+  table.tt {
+    box-shadow:none; border:1px solid #999;
+    min-width:unset; border-radius:0;
+    page-break-inside:avoid;
+  }
+  table.tt th, table.tt td { padding:3px 5px; }
+  table.tt thead th {
+    background:#1E1B4B !important; color:#fff !important;
+    font-size:10px; padding:5px 4px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  table.tt thead th.period-head {
+    background:#312E81 !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  table.tt tbody td.period-cell { font-size:10px; }
+  table.tt tbody tr:hover td { background:inherit; }
+
+  /* 칩 압축 */
+  .cell-inner { min-height:unset; }
+  .student-chip {
+    padding:2px 4px; margin:1px 0; border-radius:4px; border-left-width:2px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .chip-num { font-size:9px; }
+  .chip-name { font-size:10px; }
+  .chip-sub {
+    font-size:8px; padding:1px 3px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .no-absent { padding:4px 0; font-size:9px; }
+}
+.print-header {
+  display:none; font-size:13px; font-weight:800;
+  padding:6px 0 10px; color:#1E293B;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📋 Final 특강 출석 안내</h1>
+  <span class="sub" id="dateRange"></span>
+  <a href="반별시간표.html" target="_blank" class="btn-link">📅 반별 시간표</a>
+  <a href="index.html" target="_blank" class="btn-link">👨‍🏫 교사 시간표</a>
+  <button class="btn-link btn-print" onclick="window.print()">🖨️ 인쇄</button>
+</div>
+
+<div class="class-tabs" id="classTabs"></div>
+
+<div class="main">
+  <div class="print-header" id="printHeader"></div>
+  <div id="content" class="loading">데이터 불러오는 중...</div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsExXw_6ugNOmS3Xj9HI1iLUy5LMbOQs5QqudzHTlZ79E2_WKkkwg/exec';
+const DATE_RANGE = '10월 21일(수) ~ 11월 13일(금)';
+const NUM_CLASSES = 11;
+const DAYS    = ['월','화','수','목','금'];
+const PERIODS = [7, 6, 6, 7, 6]; // 요일별 최대 교시
+
+// 특강 시간표: 과목 → 슬롯 배열
+const FINAL_SCHEDULE = {
+  '국어':        ['화1','화2','목3'],
+  '영어':        ['화3','화4','목5','목6'],
+  '수학':        ['금3','금4'],
+  '확률과 통계': ['수1','수2'],
+  '사회문화':    ['수3','수4'],
+  '생활과 윤리': ['금1','금2'],
+  '세계지리':    ['월3','월4','목1','목2'],
+};
+
+const SHORT = {
+  '국어':'국어','영어':'영어','수학':'수학',
+  '확률과 통계':'확통','사회문화':'사문','생활과 윤리':'생윤','세계지리':'세지'
+};
+
+const SHORT_CLS = {
+  '국어':'sub-국어','영어':'sub-영어','수학':'sub-수학',
+  '확률과 통계':'sub-확통','사회문화':'sub-사문','생활과 윤리':'sub-생윤','세계지리':'sub-세지'
+};
+
+let DB = null;
+let currentBan = 1;
+
+document.getElementById('dateRange').textContent = DATE_RANGE;
+
+function startTimer(updateFn) {
+  const t0 = Date.now();
+  const iv = setInterval(() => updateFn(Math.floor((Date.now()-t0)/1000)), 1000);
+  return () => clearInterval(iv);
+}
+
+async function fetchWithRetry(url, maxTry = 3, timeout = 45000) {
+  let lastErr;
+  for (let i = 1; i <= maxTry; i++) {
+    const ctrl = new AbortController();
+    const tid  = setTimeout(() => ctrl.abort(), timeout);
+    try {
+      const res  = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      const text = await res.text();
+      if (text.trimStart()[0] !== '{' && text.trimStart()[0] !== '[') {
+        throw new Error('서버에서 JSON 대신 HTML을 반환했습니다 (Apps Script 인증 필요)');
+      }
+      return JSON.parse(text);
+    } catch(e) {
+      clearTimeout(tid);
+      lastErr = e;
+      if (i < maxTry) {
+        await new Promise(r => setTimeout(r, 3000));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+async function initLoad() {
+  const contentEl = document.getElementById('content');
+  contentEl.innerHTML = '<div class="loading">⏳ 데이터 불러오는 중… 0초</div>';
+  const stopTimer = startTimer(sec => {
+    contentEl.innerHTML = `<div class="loading">⏳ Apps Script 응답 대기 중… ${sec}초</div>`;
+  });
+
+  try {
+    const data = await fetchWithRetry(SCRIPT_URL + '?type=enrollment');
+    stopTimer();
+    DB = data;
+    buildTabs();
+    renderClass(currentBan);
+  } catch(err) {
+    stopTimer();
+    contentEl.innerHTML =
+      `<div class="error-msg">
+        데이터를 불러오지 못했습니다.<br>
+        <small style="color:#94A3B8;margin-top:6px;display:block">
+          ${err.message || '네트워크 오류 — 잠시 후 다시 시도해주세요'}
+        </small><br>
+        <button onclick="initLoad()"
+          style="margin-top:8px;padding:6px 16px;border-radius:8px;border:none;
+          background:#4F46E5;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+          🔄 다시 시도
+        </button>
+      </div>`;
+  }
+}
+
+initLoad();
+
+// 반별로 결석 학생 수 미리 계산 (탭 표시용)
+function countAbsent(ban) {
+  if (!DB || !DB.enrollment) return 0;
+  return DB.enrollment.filter(s => s.ban === ban && s.subjects && s.subjects.length > 0).length;
+}
+
+function buildTabs() {
+  const wrap = document.getElementById('classTabs');
+  wrap.innerHTML = '';
+  for (let c = 1; c <= NUM_CLASSES; c++) {
+    const cnt = DB.enrollment ? DB.enrollment.filter(s => s.ban === c).length : 0;
+    const tab = document.createElement('button');
+    tab.className = 'cls-tab' + (cnt > 0 ? ' has-absent' : '') + (c === 1 ? ' active' : '');
+    tab.textContent = c + '반';
+    tab.dataset.ban = c;
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cls-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentBan = c;
+      renderClass(c);
+    });
+    wrap.appendChild(tab);
+  }
+}
+
+function renderClass(ban) {
+  if (!DB) return;
+
+  // 이 반의 수강 학생 목록
+  const students = (DB.enrollment || []).filter(s => s.ban === ban);
+
+  // 슬롯별 결석 학생 맵: {슬롯: [{name, sub}]}
+  const slotMap = {};
+  students.forEach(s => {
+    (s.subjects || []).forEach(sub => {
+      const slots = FINAL_SCHEDULE[sub] || [];
+      slots.forEach(slot => {
+        if (!slotMap[slot]) slotMap[slot] = [];
+        slotMap[slot].push({ name: s.name, sub, hakbun: s.hakbun });
+      });
+    });
+  });
+
+  // 총 결석 슬롯 수
+  const totalStudents = students.length;
+
+  // 인쇄 헤더
+  document.getElementById('printHeader').textContent =
+    `Final 특강 출석 안내 — ${ban}반 (${DATE_RANGE})`;
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // 테이블 생성
+  const maxPeriod = Math.max(...PERIODS); // 7
+
+  let html = `
+  <div class="class-header-bar">
+    <span class="class-title">${ban}반</span>
+    <span class="class-subtitle">특강 수강 학생 ${totalStudents}명</span>
+    <span class="total-badge${totalStudents === 0 ? ' zero' : ''}">
+      ${totalStudents > 0 ? `총 ${totalStudents}명 수강 중` : '수강 학생 없음'}
+    </span>
+  </div>
+  <div class="tt-wrap">
+  <table class="tt">
+    <thead>
+      <tr>
+        <th class="period-head">교시</th>
+        ${DAYS.map(d => `<th>${d}요일</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>`;
+
+  for (let p = 1; p <= maxPeriod; p++) {
+    html += `<tr><td class="period-cell">${p}교시</td>`;
+    DAYS.forEach((day, di) => {
+      if (p > PERIODS[di]) {
+        html += `<td style="background:#F8FAFC"></td>`;
+        return;
+      }
+      const slot = day + p;
+      const absentList = slotMap[slot] || [];
+      html += `<td><div class="cell-inner">`;
+      if (absentList.length === 0) {
+        html += `<div class="no-absent">—</div>`;
+      } else {
+        // 이름 순 정렬
+        absentList.sort((a, b) => a.name.localeCompare(b.name));
+        absentList.forEach(item => {
+          const cls = SHORT_CLS[item.sub] || '';
+          const num = item.hakbun ? parseInt(item.hakbun) % 100 : '';
+          html += `<div class="student-chip">
+            <span class="chip-num">${num}번</span>
+            <span class="chip-name">${esc(item.name)}</span>
+            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>
+          </div>`;
+        });
+      }
+      html += `</div></td>`;
+    });
+    html += `</tr>`;
+  }
+
+  html += `</tbody></table></div>`;
+
+  // 수강 중인 학생 목록 (하단 요약 — 인쇄 시 숨김)
+  if (students.length > 0) {
+    html += `<div class="student-list-section" style="margin-top:16px;background:#fff;border:1px solid var(--border);
+      border-radius:10px;padding:12px 16px;">
+      <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px">
+        ${ban}반 수강 학생 전체 목록
+      </div>`;
+    students.sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;
+        border-bottom:1px solid #F1F5F9;font-size:13px;">
+        <span style="font-weight:700;min-width:56px">${esc(s.name)}</span>
+        <span style="color:var(--muted);font-size:11px">`;
+      (s.subjects || []).forEach(sub => {
+        const cls = SHORT_CLS[sub] || '';
+        html += `<span class="chip-sub ${cls}" style="margin-right:4px">${esc(SHORT[sub] || sub)}</span>`;
+      });
+      html += `</span></div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+</script>
+</body>
+</html>
