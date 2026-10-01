@@ -861,7 +861,7 @@ function buildGrid(sched, diffKeys){
       const isDiff  = diffKeys && diffKeys.includes(key);
       const isFinal = cell && cell.s && cell.s.includes('FINAL수업');
       const isPlus  = cell && cell.r && cell.r.includes('+');
-      const isDuty  = cell && cell.s && cell.s.includes('자율학습');
+      const isDuty  = cell && cell.s && (cell.s.includes('자율학습') || cell.s.includes('영생관독실'));
       if(cell){
         const cls = ['slot', isDiff?'diff':'', isFinal?'final':'', isPlus?'plus':'', isDuty?'duty':''].filter(Boolean).join(' ');
         const crLines = (cell.r || '').split('\n').filter(Boolean);
@@ -912,7 +912,7 @@ function select(name){
       <span class="lsep"></span>
       <span class="ld" style="background:#7CFC00;border:1.5px solid #3DA800"></span><span>대체교사(+)</span>
       <span class="lsep"></span>
-      <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>자율학습감독</span>
+      <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>영생관독실</span>
       <span class="lsep"></span>
       <span>· 빈 교시</span>
       <span class="lsep"></span>
@@ -989,7 +989,7 @@ function buildPrintPage(name){
         <span class="pp-lsep"></span>
         <span class="pp-ld" style="background:#7CFC00;border:1px solid #3DA800"></span>대체교사(+)
         <span class="pp-lsep"></span>
-        <span class="pp-ld" style="background:#BAE6FD;border:1px solid #38BDF8"></span>자율학습감독
+        <span class="pp-ld" style="background:#BAE6FD;border:1px solid #38BDF8"></span>영생관독실
         <span class="pp-lsep"></span>
         회색 = 해당 요일에 없는 교시
       </div>
