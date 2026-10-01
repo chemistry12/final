@@ -296,7 +296,7 @@ body{
     <span class="lsep"></span>
     <span class="ld" style="background:#FFFF00;border:1.5px solid #CCA800"></span><span>FINAL수업</span>
     <span class="lsep"></span>
-    <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>자율학습감독</span>
+    <span class="ld" style="background:#BAE6FD;border:1.5px solid #38BDF8"></span><span>영생관독실</span>
     <span class="lsep"></span>
     <span>· 빈 교시</span>
     <span class="lsep"></span>
@@ -384,7 +384,7 @@ function buildCS() {
       const classes = parseClasses(cell.r || '');
       if (!classes.length) return;
 
-      const isDuty    = !!(cell.s && cell.s.includes('자율학습'));
+      const isDuty    = !!(cell.s && (cell.s.includes('자율학습') || cell.s.includes('영생관독실')));
       const isFinal   = !!(cell.s && cell.s.includes('FINAL수업'));
       const isChanged = !!(DB.changed && DB.changed[teacher] && DB.changed[teacher].includes(key));
 
@@ -447,9 +447,9 @@ function buildGrid(cn) {
           e.isDuty                    ? 'duty'  : ''
         ].filter(Boolean).join(' ');
 
-        // 합반 표시 (e.g. "+4반 합반")
+        // 합반 표시 (e.g. "1반+4반 합반")
         const partnerTxt = e.partners.length > 0
-          ? `<span class="cp">+${e.partners.join('·')}반 합반</span>`
+          ? `<span class="cp">${[cn, ...e.partners].join('반+')}반 합반</span>`
           : '';
 
         // 복수 교사인 경우 (드문 케이스)
@@ -507,7 +507,7 @@ function buildDutySchedule() {
     const afterSched  = (DB.after  && DB.after[teacher])  || {};
     const sched = Object.assign({}, beforeSched, afterSched);
     Object.entries(sched).forEach(([key, cell]) => {
-      if (!cell || !cell.s || !cell.s.includes('자율학습')) return;
+      if (!cell || !cell.s || !(cell.s.includes('자율학습') || cell.s.includes('영생관독실'))) return;
       if (!duty[key]) duty[key] = [];
       // 담당 반 파싱
       const classes = parseClasses(cell.r || '');
@@ -562,12 +562,12 @@ function selectDuty() {
   document.querySelectorAll('.ci-btn').forEach(b => {
     b.classList.toggle('on', b.dataset.c === '4층');
   });
-  document.getElementById('tpClass').textContent = '4층 자율학습감독';
+  document.getElementById('tpClass').textContent = '영생관독실';
   const badge = document.getElementById('tpBadge');
   badge.className = 'tp-badge'; // 숨김
   const content = document.getElementById('content');
   content.innerHTML = `
-    <div class="print-header">4층 자율학습감독 — ${TITLE}</div>
+    <div class="print-header">영생관독실 — ${TITLE}</div>
     <div class="print-range">${DATE_RANGE}</div>
     ${buildDutyGrid()}
   `;
@@ -623,7 +623,7 @@ function renderSidebar() {
       data-c="4층" onclick="selectDuty()"
       style="font-size:13px;background:${cur==='4층'?'var(--duty-bd)':'rgba(186,230,253,.08)'};
         color:${cur==='4층'?'#0C4A6E':'#7DD3FC'};"
-      title="4층 자율학습감독 교사">
+      title="영생관독실 교사">
       4층
     </button>`;
 
