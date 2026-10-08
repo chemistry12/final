@@ -13,6 +13,7 @@
 * { box-sizing:border-box; margin:0; padding:0; }
 body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
        background:var(--bg); color:var(--text); min-height:100vh; }
+
 /* ── 공통 네비게이션 바 ── */
 .site-nav{
   display:flex;align-items:center;gap:2px;
@@ -84,6 +85,25 @@ body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
 }
 .total-badge.zero { background:#F1F5F9; color:#94A3B8; border-color:#E2E8F0; }
 
+/* ── 영생관독실 배너 ── */
+.gwandok-bar {
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:8px 12px; margin-bottom:12px;
+  background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px;
+  font-size:12px;
+}
+.gwandok-label {
+  font-size:11px; font-weight:800; color:#1D4ED8;
+  letter-spacing:.04em; white-space:nowrap; margin-right:2px;
+}
+.gwandok-chip {
+  display:inline-flex; align-items:center; gap:3px;
+  background:#DBEAFE; color:#1E3A8A; border:1px solid #93C5FD;
+  border-radius:20px; padding:2px 10px; font-size:12px; font-weight:700;
+}
+.gwandok-chip .g-num { font-size:10px; color:#3B82F6; }
+.gwandok-empty { color:#93C5FD; font-style:italic; font-size:12px; }
+
 /* 시간표 테이블 */
 .tt-wrap { overflow-x:auto; }
 table.tt {
@@ -93,7 +113,7 @@ table.tt {
   box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
 table.tt th, table.tt td {
-  border:1px solid var(--border); padding:6px 8px; vertical-align:top;
+  border:1px solid #CBD5E1; padding:6px 8px; vertical-align:top;
   width:calc((100% - 56px) / 5);
 }
 table.tt thead th {
@@ -104,11 +124,12 @@ table.tt thead th.period-head {
   background:#312E81; color:#A5B4FC; width:56px; font-size:11px;
 }
 table.tt tbody td.period-cell {
-  background:#F8FAFC; text-align:center;
-  font-size:13px; font-weight:800; color:var(--muted); width:56px;
+  background:#F1F5F9; text-align:center;
+  font-size:13px; font-weight:800; color:#334155; width:56px;
+  border-right:2px solid #94A3B8;
 }
 table.tt tbody tr:hover td { background:#FAFAFE; }
-table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
+table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 
 /* 셀 내부 학생 카드 */
 .cell-inner { min-height:36px; }
@@ -126,7 +147,7 @@ table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
   border-radius:8px; white-space:nowrap;
 }
 
-/* 과목 색 — 인쇄에서도 잘 보이도록 진하게 */
+/* 과목 색 */
 .sub-국어    { background:#C4B5FD; color:#3B0764; }
 .sub-영어    { background:#6EE7B7; color:#064E3B; }
 .sub-수학    { background:#FCA5A5; color:#7F1D1D; }
@@ -139,7 +160,7 @@ table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
 @media print {
   @page { size: A4 landscape; margin:10mm; }
 
-  .topbar, .class-tabs, .student-list-section { display:none !important; }
+  .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
   .main { padding:0; }
   body { background:#fff; }
 
@@ -149,14 +170,26 @@ table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
   .class-title { font-size:14px; }
   .class-subtitle, .total-badge { font-size:10px; }
 
-  /* 테이블 압축 */
+  /* 관독실 배너 */
+  .gwandok-bar {
+    padding:5px 10px; margin-bottom:8px; border:1px solid #93C5FD;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .gwandok-chip {
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* 테이블 */
   .tt-wrap { overflow:visible; }
   table.tt {
-    box-shadow:none; border:1px solid #999;
+    box-shadow:none; border:2px solid #555 !important;
     min-width:unset; border-radius:0;
     page-break-inside:avoid;
   }
-  table.tt th, table.tt td { padding:3px 5px; }
+  table.tt th, table.tt td {
+    padding:3px 5px;
+    border:1px solid #888 !important;
+  }
   table.tt thead th {
     background:#1E1B4B !important; color:#fff !important;
     font-size:10px; padding:5px 4px;
@@ -166,8 +199,16 @@ table.tt tbody tr:hover td.period-cell { background:#F1F5F9; }
     background:#312E81 !important;
     -webkit-print-color-adjust:exact; print-color-adjust:exact;
   }
-  table.tt tbody td.period-cell { font-size:10px; }
+  table.tt tbody td.period-cell {
+    font-size:10px; font-weight:900;
+    background:#D1D5DB !important; color:#111 !important;
+    border-right:2px solid #555 !important;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
   table.tt tbody tr:hover td { background:inherit; }
+  table.tt tbody tr:nth-child(even) td:not(.period-cell) {
+    background:#F9FAFB !important;
+  }
 
   /* 칩 압축 */
   .cell-inner { min-height:unset; }
@@ -217,7 +258,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrXoKySwqCCMLfTNsEx
 const DATE_RANGE = '10월 21일(수) ~ 11월 13일(금)';
 const NUM_CLASSES = 11;
 const DAYS    = ['월','화','수','목','금'];
-const PERIODS = [7, 6, 6, 7, 6]; // 요일별 최대 교시
+const PERIODS = [7, 6, 6, 7, 6]; // 월화수목금 최대 교시
 
 // 특강 시간표: 과목 → 슬롯 배열
 const FINAL_SCHEDULE = {
@@ -241,9 +282,21 @@ const SHORT_CLS = {
 };
 
 let DB = null;
+let GWANDOK_DB = null; // 영생관독실 학생 명단
 let currentBan = 1;
 
 document.getElementById('dateRange').textContent = DATE_RANGE;
+
+// 학번에서 반 추출: 학년(1) + 반(2자리) + 번호(2자리) = 5자리
+function getClassFromHakbun(hakbun) {
+  return parseInt(String(hakbun).slice(1, 3));
+}
+
+// 학번에서 번호 추출
+function getNumFromHakbun(hakbun) {
+  const s = String(hakbun);
+  return s.length >= 5 ? parseInt(s.slice(3)) : parseInt(hakbun) % 100;
+}
 
 function startTimer(updateFn) {
   const t0 = Date.now();
@@ -285,9 +338,14 @@ async function initLoad() {
   });
 
   try {
-    const data = await fetchWithRetry(SCRIPT_URL + '?type=enrollment');
+    // 수강 명단 + 관독실 명단 동시 요청 (관독실은 실패해도 계속)
+    const [enrollData, gwandokData] = await Promise.all([
+      fetchWithRetry(SCRIPT_URL + '?type=enrollment'),
+      fetchWithRetry(SCRIPT_URL + '?type=gwandok').catch(() => null)
+    ]);
     stopTimer();
-    DB = data;
+    DB = enrollData;
+    GWANDOK_DB = gwandokData;
     buildTabs();
     renderClass(currentBan);
   } catch(err) {
@@ -308,12 +366,6 @@ async function initLoad() {
 }
 
 initLoad();
-
-// 반별로 결석 학생 수 미리 계산 (탭 표시용)
-function countAbsent(ban) {
-  if (!DB || !DB.enrollment) return 0;
-  return DB.enrollment.filter(s => s.ban === ban && s.subjects && s.subjects.length > 0).length;
-}
 
 function buildTabs() {
   const wrap = document.getElementById('classTabs');
@@ -340,7 +392,12 @@ function renderClass(ban) {
   // 이 반의 수강 학생 목록
   const students = (DB.enrollment || []).filter(s => s.ban === ban);
 
-  // 슬롯별 결석 학생 맵: {슬롯: [{name, sub}]}
+  // 이 반의 관독실 학생 목록
+  const gwandokStudents = GWANDOK_DB && GWANDOK_DB.students
+    ? GWANDOK_DB.students.filter(s => getClassFromHakbun(s.hakbun) === ban)
+    : null; // null = 데이터 미로드, [] = 이 반 학생 없음
+
+  // 슬롯별 결석 학생 맵: {슬롯: [{name, sub, hakbun}]}
   const slotMap = {};
   students.forEach(s => {
     (s.subjects || []).forEach(sub => {
@@ -352,7 +409,6 @@ function renderClass(ban) {
     });
   });
 
-  // 총 결석 슬롯 수
   const totalStudents = students.length;
 
   // 인쇄 헤더
@@ -360,6 +416,20 @@ function renderClass(ban) {
     `Final 특강 출석 안내 — ${ban}반 (${DATE_RANGE})`;
 
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // 영생관독실 배너
+  let gwandokHtml = '';
+  if (gwandokStudents !== null) {
+    const chips = gwandokStudents.length > 0
+      ? gwandokStudents
+          .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun))
+          .map(g => {
+            const num = getNumFromHakbun(g.hakbun);
+            return `<span class="gwandok-chip"><span class="g-num">${num}번</span> ${esc(g.name)}</span>`;
+          }).join('')
+      : `<span class="gwandok-empty">이 반 학생 없음</span>`;
+    gwandokHtml = `<div class="gwandok-bar"><span class="gwandok-label">🏫 영생관독실</span>${chips}</div>`;
+  }
 
   // 테이블 생성
   const maxPeriod = Math.max(...PERIODS); // 7
@@ -372,6 +442,7 @@ function renderClass(ban) {
       ${totalStudents > 0 ? `총 ${totalStudents}명 수강 중` : '수강 학생 없음'}
     </span>
   </div>
+  ${gwandokHtml}
   <div class="tt-wrap">
   <table class="tt">
     <thead>
@@ -386,7 +457,8 @@ function renderClass(ban) {
     html += `<tr><td class="period-cell">${p}교시</td>`;
     DAYS.forEach((day, di) => {
       if (p > PERIODS[di]) {
-        html += `<td style="background:#F8FAFC"></td>`;
+        // 이 요일에 이 교시 없음 — 빈 셀
+        html += `<td style="background:#F1F5F9;"></td>`;
         return;
       }
       const slot = day + p;
@@ -395,11 +467,11 @@ function renderClass(ban) {
       if (absentList.length === 0) {
         html += `<div class="no-absent">—</div>`;
       } else {
-        // 이름 순 정렬
-        absentList.sort((a, b) => a.name.localeCompare(b.name));
+        // 번호 순 정렬
+        absentList.sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
         absentList.forEach(item => {
           const cls = SHORT_CLS[item.sub] || '';
-          const num = item.hakbun ? parseInt(item.hakbun) % 100 : '';
+          const num = getNumFromHakbun(item.hakbun);
           html += `<div class="student-chip">
             <span class="chip-num">${num}번</span>
             <span class="chip-name">${esc(item.name)}</span>
@@ -421,17 +493,22 @@ function renderClass(ban) {
       <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px">
         ${ban}반 수강 학생 전체 목록
       </div>`;
-    students.sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
-      html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;
-        border-bottom:1px solid #F1F5F9;font-size:13px;">
-        <span style="font-weight:700;min-width:56px">${esc(s.name)}</span>
-        <span style="color:var(--muted);font-size:11px">`;
-      (s.subjects || []).forEach(sub => {
-        const cls = SHORT_CLS[sub] || '';
-        html += `<span class="chip-sub ${cls}" style="margin-right:4px">${esc(SHORT[sub] || sub)}</span>`;
+    students
+      .slice()
+      .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun))
+      .forEach(s => {
+        const num = getNumFromHakbun(s.hakbun);
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;
+          border-bottom:1px solid #F1F5F9;font-size:13px;">
+          <span style="font-weight:700;min-width:30px;color:#94A3B8;font-size:11px">${num}번</span>
+          <span style="font-weight:700;min-width:56px">${esc(s.name)}</span>
+          <span style="color:var(--muted);font-size:11px">`;
+        (s.subjects || []).forEach(sub => {
+          const cls = SHORT_CLS[sub] || '';
+          html += `<span class="chip-sub ${cls}" style="margin-right:4px">${esc(SHORT[sub] || sub)}</span>`;
+        });
+        html += `</span></div>`;
       });
-      html += `</span></div>`;
-    });
     html += `</div>`;
   }
 
