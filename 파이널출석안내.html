@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Final 특강 출석 안내</title>
+<style id="dynPrintStyle"></style>
 <style>
 :root {
   --bg:#F8FAFC; --card:#FFF; --border:#E2E8F0;
@@ -46,6 +47,19 @@ body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
 .btn-link:hover { background:#3730A3; }
 .btn-print { background:#1E3A5F; color:#93C5FD; border-color:#1E40AF; }
 .btn-print:hover { background:#1E40AF; }
+.print-controls {
+  display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+}
+.print-label {
+  font-size:11px; color:#818CF8; white-space:nowrap; margin-right:2px;
+}
+.scale-btn {
+  padding:4px 9px; border-radius:6px; border:1px solid #4338CA;
+  background:#1E1B4B; color:#A5B4FC; font-size:11px; font-weight:700;
+  cursor:pointer; transition:all .12s;
+}
+.scale-btn:hover { background:#312E81; }
+.scale-btn.active { background:#4338CA; color:#fff; border-color:#6366F1; }
 
 /* ── 반 선택 탭 ── */
 .class-tabs {
@@ -159,71 +173,93 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 
 /* ── 인쇄 ── */
 @media print {
-  @page { size: A4 landscape; margin:10mm; }
+  @page { size: A4 landscape; margin: 8mm 10mm; }
 
   .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
-  .main { padding:0; }
   body { background:#fff; }
 
+  /* 전체 너비 꽉 채우기 */
+  .main {
+    padding: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
   /* 인쇄 헤더 */
-  .print-header { display:block !important; font-size:12px; margin-bottom:5px; }
-  .class-header-bar { margin-bottom:5px; }
-  .class-title { font-size:14px; }
-  .class-subtitle, .total-badge { font-size:10px; }
+  .print-header { display:block !important; font-size:13px; font-weight:800; margin-bottom:6px; color:#1E293B; }
+  .class-header-bar { margin-bottom:6px; }
+  .class-title { font-size:16px; }
+  .class-subtitle { font-size:11px; }
+  .total-badge { font-size:11px; padding:3px 10px; }
 
   /* 관독실 배너 */
   .gwandok-bar {
-    padding:5px 10px; margin-bottom:8px; border:1px solid #93C5FD;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    padding: 7px 12px; margin-bottom: 8px;
+    border: 2px solid #93C5FD; border-left: 4px solid #2563EB;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
+  .gwandok-label { font-size: 13px; }
   .gwandok-chip {
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    font-size: 13px; padding: 4px 12px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
+  .gwandok-chip .g-num { font-size: 11px; }
 
-  /* 테이블 */
-  .tt-wrap { overflow:visible; }
+  /* 테이블 전체 크기 */
+  .tt-wrap { overflow: visible; }
   table.tt {
-    box-shadow:none; border:2px solid #555 !important;
-    min-width:unset; border-radius:0;
-    page-break-inside:avoid;
+    box-shadow: none;
+    border: 2px solid #333 !important;
+    min-width: unset;
+    border-radius: 0;
+    width: 100% !important;
+    table-layout: fixed;
+    page-break-inside: avoid;
   }
+  /* 각 행 높이 — 내용이 적으면 늘어나서 페이지 꽉 채움 */
+  table.tt tbody tr { height: 21mm; }
+
   table.tt th, table.tt td {
-    padding:3px 5px;
-    border:1px solid #888 !important;
+    padding: 5px 7px;
+    border: 1px solid #777 !important;
+    vertical-align: top;
   }
   table.tt thead th {
-    background:#1E1B4B !important; color:#fff !important;
-    font-size:10px; padding:5px 4px;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    background: #1E1B4B !important; color: #fff !important;
+    font-size: 13px; font-weight: 800; padding: 6px 5px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   table.tt thead th.period-head {
-    background:#312E81 !important;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    background: #312E81 !important;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   table.tt tbody td.period-cell {
-    font-size:10px; font-weight:900;
-    background:#D1D5DB !important; color:#111 !important;
-    border-right:2px solid #555 !important;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    font-size: 13px; font-weight: 900; text-align: center;
+    background: #D1D5DB !important; color: #111 !important;
+    border-right: 2px solid #444 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  table.tt tbody tr:hover td { background:inherit; }
+  table.tt tbody tr:hover td { background: inherit; }
   table.tt tbody tr:nth-child(even) td:not(.period-cell) {
-    background:#F9FAFB !important;
+    background: #F9FAFB !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
 
-  /* 칩 압축 */
-  .cell-inner { min-height:unset; }
+  /* 칩 — 화면보다 크게 */
+  .cell-inner { min-height: unset; }
   .student-chip {
-    padding:2px 4px; margin:1px 0; border-radius:4px; border-left-width:2px;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    padding: 3px 6px; margin: 2px 0; border-radius: 4px; border-left-width: 3px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  .chip-num { font-size:9px; }
-  .chip-name { font-size:10px; }
+  .chip-num { font-size: 12px; }
+  .chip-name { font-size: 13px; }
   .chip-sub {
-    font-size:8px; padding:1px 3px;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    font-size: 11px; padding: 1px 5px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-  .no-absent { padding:4px 0; font-size:9px; }
+  .no-absent { padding: 4px 0; font-size: 11px; }
 }
 .print-header {
   display:none; font-size:13px; font-weight:800;
@@ -244,7 +280,14 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   <span class="sub" id="dateRange"></span>
   <a href="반별시간표.html" target="_blank" class="btn-link">📅 반별 시간표</a>
   <a href="index.html" target="_blank" class="btn-link">👨‍🏫 교사 시간표</a>
-  <button class="btn-link btn-print" onclick="window.print()">🖨️ 인쇄</button>
+  <div class="print-controls">
+    <span class="print-label">인쇄 비율</span>
+    <button class="scale-btn active" onclick="setScale(this,1)">100%</button>
+    <button class="scale-btn" onclick="setScale(this,0.85)">85%</button>
+    <button class="scale-btn" onclick="setScale(this,0.75)">75%</button>
+    <button class="scale-btn" onclick="setScale(this,0.65)">65%</button>
+    <button class="btn-link btn-print" onclick="doPrint()">🖨️ 인쇄</button>
+  </div>
 </div>
 
 <div class="class-tabs" id="classTabs"></div>
@@ -283,8 +326,31 @@ const SHORT_CLS = {
 };
 
 let DB = null;
-let GWANDOK_DB = null; // 영생관독실 학생 명단
+let GWANDOK_DB = null;
 let currentBan = 1;
+let currentScale = 1;
+
+function setScale(btn, scale) {
+  currentScale = scale;
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function doPrint() {
+  const dynStyle = document.getElementById('dynPrintStyle');
+  if (currentScale === 1) {
+    dynStyle.textContent = '';
+  } else {
+    dynStyle.textContent = `
+      @media print {
+        .main {
+          zoom: ${currentScale};
+          transform-origin: top left;
+        }
+      }`;
+  }
+  window.print();
+}
 
 document.getElementById('dateRange').textContent = DATE_RANGE;
 
