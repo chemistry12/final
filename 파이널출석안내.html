@@ -175,7 +175,7 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 
 /* ── 단일 반 인쇄 ── */
 @media print {
-  @page { size: A4 landscape; margin: 8mm 10mm; }
+  @page { size: A4 landscape; margin: 15mm; }
   .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
   body { background:#fff; }
   .main { padding:0 !important; max-width:none !important; margin:0 !important; width:100% !important; }
@@ -190,7 +190,7 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   .gwandok-chip .g-num { font-size:11px; }
   .tt-wrap { overflow:visible; }
   table.tt { box-shadow:none; border:2px solid #333 !important; min-width:unset; border-radius:0; width:100% !important; table-layout:fixed; page-break-inside:avoid; }
-  table.tt tbody tr { height:21mm; }
+  table.tt tbody tr { height:19mm; }
   table.tt th, table.tt td { padding:5px 7px; border:1px solid #777 !important; vertical-align:top; }
   table.tt thead th { background:#1E1B4B !important; color:#fff !important; font-size:13px; font-weight:800; padding:6px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   table.tt thead th.period-head { background:#312E81 !important; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -412,7 +412,7 @@ function getFullPrintCSS() {
   return `
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;background:#fff;}
-    @page{size:A4 landscape;margin:8mm 10mm;}
+    @page{size:A4 landscape;margin:15mm;}
     .class-page{width:100%;transform-origin:top left;}
     .page-break{page-break-after:always;}
     .print-header{font-size:13px;font-weight:800;margin-bottom:6px;color:#1E293B;}
@@ -428,7 +428,7 @@ function getFullPrintCSS() {
     .gwandok-empty{color:#93C5FD;font-style:italic;font-size:13px;}
     .tt-wrap{overflow:visible;}
     table.tt{border-collapse:collapse;width:100%;table-layout:fixed;border:2px solid #333 !important;border-radius:0;}
-    table.tt tbody tr{height:21mm;}
+    table.tt tbody tr{height:19mm;}
     table.tt th,table.tt td{border:1px solid #777 !important;padding:5px 7px;vertical-align:top;width:calc((100% - 56px)/5);}
     table.tt thead th{background:#1E1B4B !important;color:#fff !important;font-size:13px;font-weight:800;padding:6px 5px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     table.tt thead th.period-head{background:#312E81 !important;font-size:12px;width:56px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
