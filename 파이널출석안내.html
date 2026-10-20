@@ -175,10 +175,11 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 
 /* ── 단일 반 인쇄 ── */
 @media print {
-  @page { size: A4 landscape; margin: 15mm; }
+  /* margin:0 — 브라우저 인쇄 여백 설정과 무관하게 padding으로 여백 처리 */
+  @page { size: A4 landscape; margin: 0; }
   .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
   body { background:#fff; }
-  .main { padding:0 !important; max-width:none !important; margin:0 !important; width:100% !important; }
+  .main { padding:12mm 15mm !important; max-width:none !important; margin:0 !important; width:100% !important; box-sizing:border-box !important; }
   .print-header { display:block !important; font-size:13px; font-weight:800; margin-bottom:6px; color:#1E293B; }
   .class-header-bar { margin-bottom:6px; }
   .class-title { font-size:16px; }
@@ -412,8 +413,8 @@ function getFullPrintCSS() {
   return `
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;background:#fff;}
-    @page{size:A4 landscape;margin:15mm;}
-    .class-page{width:100%;transform-origin:top left;}
+    @page{size:A4 landscape;margin:0;}
+    .class-page{width:100%;transform-origin:top left;padding:12mm 15mm;box-sizing:border-box;}
     .page-break{page-break-after:always;}
     .print-header{font-size:13px;font-weight:800;margin-bottom:6px;color:#1E293B;}
     .class-header-bar{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
