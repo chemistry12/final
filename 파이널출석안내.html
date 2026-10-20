@@ -47,6 +47,8 @@ body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
 .btn-link:hover { background:#3730A3; }
 .btn-print { background:#1E3A5F; color:#93C5FD; border-color:#1E40AF; }
 .btn-print:hover { background:#1E40AF; }
+.btn-printall { background:#064E3B; color:#6EE7B7; border-color:#047857; }
+.btn-printall:hover { background:#047857; }
 .print-controls {
   display:flex; align-items:center; gap:4px; flex-wrap:wrap;
 }
@@ -60,6 +62,7 @@ body { font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;
 }
 .scale-btn:hover { background:#312E81; }
 .scale-btn.active { background:#4338CA; color:#fff; border-color:#6366F1; }
+.divider { width:1px; height:20px; background:rgba(255,255,255,.15); margin:0 4px; }
 
 /* ── 반 선택 탭 ── */
 .class-tabs {
@@ -149,7 +152,6 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 /* 셀 내부 학생 카드 */
 .cell-inner { min-height:36px; }
 .no-absent { color:#94A3B8; font-size:11px; text-align:center; padding:8px 0; }
-
 .student-chip {
   display:flex; align-items:center; gap:4px;
   padding:3px 6px; margin:2px 0; border-radius:6px;
@@ -171,100 +173,38 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 .sub-생윤    { background:#7DD3FC; color:#0C2A4A; }
 .sub-세지    { background:#86EFAC; color:#14532D; }
 
-/* ── 인쇄 ── */
+/* ── 단일 반 인쇄 ── */
 @media print {
   @page { size: A4 landscape; margin: 8mm 10mm; }
-
   .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
   body { background:#fff; }
-
-  /* 전체 너비 꽉 채우기 */
-  .main {
-    padding: 0 !important;
-    max-width: none !important;
-    margin: 0 !important;
-    width: 100% !important;
-  }
-
-  /* 인쇄 헤더 */
+  .main { padding:0 !important; max-width:none !important; margin:0 !important; width:100% !important; }
   .print-header { display:block !important; font-size:13px; font-weight:800; margin-bottom:6px; color:#1E293B; }
   .class-header-bar { margin-bottom:6px; }
   .class-title { font-size:16px; }
   .class-subtitle { font-size:11px; }
   .total-badge { font-size:11px; padding:3px 10px; }
-
-  /* 관독실 배너 */
-  .gwandok-bar {
-    padding: 7px 12px; margin-bottom: 8px;
-    border: 2px solid #93C5FD; border-left: 4px solid #2563EB;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .gwandok-label { font-size: 13px; }
-  .gwandok-chip {
-    font-size: 13px; padding: 4px 12px;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .gwandok-chip .g-num { font-size: 11px; }
-
-  /* 테이블 전체 크기 */
-  .tt-wrap { overflow: visible; }
-  table.tt {
-    box-shadow: none;
-    border: 2px solid #333 !important;
-    min-width: unset;
-    border-radius: 0;
-    width: 100% !important;
-    table-layout: fixed;
-    page-break-inside: avoid;
-  }
-  /* 각 행 높이 — 내용이 적으면 늘어나서 페이지 꽉 채움 */
-  table.tt tbody tr { height: 21mm; }
-
-  table.tt th, table.tt td {
-    padding: 5px 7px;
-    border: 1px solid #777 !important;
-    vertical-align: top;
-  }
-  table.tt thead th {
-    background: #1E1B4B !important; color: #fff !important;
-    font-size: 13px; font-weight: 800; padding: 6px 5px;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  table.tt thead th.period-head {
-    background: #312E81 !important;
-    font-size: 12px;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  table.tt tbody td.period-cell {
-    font-size: 13px; font-weight: 900; text-align: center;
-    background: #D1D5DB !important; color: #111 !important;
-    border-right: 2px solid #444 !important;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  table.tt tbody tr:hover td { background: inherit; }
-  table.tt tbody tr:nth-child(even) td:not(.period-cell) {
-    background: #F9FAFB !important;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-
-  /* 칩 — 화면보다 크게 */
-  .cell-inner { min-height: unset; }
-  .student-chip {
-    padding: 3px 6px; margin: 2px 0; border-radius: 4px; border-left-width: 3px;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .chip-num { font-size: 12px; }
-  .chip-name { font-size: 13px; }
-  .chip-sub {
-    font-size: 11px; padding: 1px 5px;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
-  }
-  .no-absent { padding: 4px 0; font-size: 11px; }
+  .gwandok-bar { padding:7px 12px; margin-bottom:8px; border:2px solid #93C5FD; border-left:4px solid #2563EB; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .gwandok-label { font-size:13px; }
+  .gwandok-chip { font-size:13px; padding:4px 12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .gwandok-chip .g-num { font-size:11px; }
+  .tt-wrap { overflow:visible; }
+  table.tt { box-shadow:none; border:2px solid #333 !important; min-width:unset; border-radius:0; width:100% !important; table-layout:fixed; page-break-inside:avoid; }
+  table.tt tbody tr { height:21mm; }
+  table.tt th, table.tt td { padding:5px 7px; border:1px solid #777 !important; vertical-align:top; }
+  table.tt thead th { background:#1E1B4B !important; color:#fff !important; font-size:13px; font-weight:800; padding:6px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  table.tt thead th.period-head { background:#312E81 !important; font-size:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  table.tt tbody td.period-cell { font-size:13px; font-weight:900; text-align:center; background:#D1D5DB !important; color:#111 !important; border-right:2px solid #444 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  table.tt tbody tr:hover td { background:inherit; }
+  table.tt tbody tr:nth-child(even) td:not(.period-cell) { background:#F9FAFB !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .cell-inner { min-height:unset; }
+  .student-chip { padding:3px 6px; margin:2px 0; border-radius:4px; border-left-width:3px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .chip-num { font-size:12px; }
+  .chip-name { font-size:13px; }
+  .chip-sub { font-size:11px; padding:1px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .no-absent { padding:4px 0; font-size:11px; }
 }
-.print-header {
-  display:none; font-size:13px; font-weight:800;
-  padding:6px 0 10px; color:#1E293B;
-}
+.print-header { display:none; font-size:13px; font-weight:800; padding:6px 0 10px; color:#1E293B; }
 </style>
 </head>
 <body>
@@ -280,14 +220,17 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   <span class="sub" id="dateRange"></span>
   <a href="반별시간표.html" target="_blank" class="btn-link">📅 반별 시간표</a>
   <a href="index.html" target="_blank" class="btn-link">👨‍🏫 교사 시간표</a>
+  <div class="divider"></div>
   <div class="print-controls">
-    <span class="print-label">인쇄 비율</span>
+    <span class="print-label">이 반 인쇄</span>
     <button class="scale-btn active" onclick="setScale(this,1)">100%</button>
     <button class="scale-btn" onclick="setScale(this,0.85)">85%</button>
     <button class="scale-btn" onclick="setScale(this,0.75)">75%</button>
     <button class="scale-btn" onclick="setScale(this,0.65)">65%</button>
-    <button class="btn-link btn-print" onclick="doPrint()">🖨️ 인쇄</button>
+    <button class="btn-link btn-print" onclick="doPrint()">🖨️ 이 반 인쇄</button>
   </div>
+  <div class="divider"></div>
+  <button class="btn-link btn-printall" onclick="printAll()">🖨️ 전체 인쇄 (1~11반)</button>
 </div>
 
 <div class="class-tabs" id="classTabs"></div>
@@ -304,7 +247,6 @@ const NUM_CLASSES = 11;
 const DAYS    = ['월','화','수','목','금'];
 const PERIODS = [7, 6, 6, 7, 6]; // 월화수목금 최대 교시
 
-// 특강 시간표: 과목 → 슬롯 배열
 const FINAL_SCHEDULE = {
   '국어':        ['화1','화2','목3'],
   '영어':        ['화3','화4','목5','목6'],
@@ -319,7 +261,6 @@ const SHORT = {
   '국어':'국어','영어':'영어','수학':'수학',
   '확률과 통계':'확통','사회문화':'사문','생활과 윤리':'생윤','세계지리':'세지'
 };
-
 const SHORT_CLS = {
   '국어':'sub-국어','영어':'sub-영어','수학':'sub-수학',
   '확률과 통계':'sub-확통','사회문화':'sub-사문','생활과 윤리':'sub-생윤','세계지리':'sub-세지'
@@ -330,6 +271,124 @@ let GWANDOK_DB = null;
 let currentBan = 1;
 let currentScale = 1;
 
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function getClassFromHakbun(hakbun) {
+  return parseInt(String(hakbun).slice(1, 3));
+}
+function getNumFromHakbun(hakbun) {
+  const s = String(hakbun);
+  return s.length >= 5 ? parseInt(s.slice(3)) : parseInt(hakbun) % 100;
+}
+
+// ─── 반별 자동 배율 계산 ───
+// 한 슬롯에 최대 몇 명이 있는지 보고 결정
+function calcAutoZoom(ban) {
+  if (!DB) return 1;
+  const students = (DB.enrollment || []).filter(s => s.ban === ban);
+  const slotCounts = {};
+  students.forEach(s => {
+    (s.subjects || []).forEach(sub => {
+      (FINAL_SCHEDULE[sub] || []).forEach(slot => {
+        slotCounts[slot] = (slotCounts[slot] || 0) + 1;
+      });
+    });
+  });
+  const vals = Object.values(slotCounts);
+  const maxInSlot = vals.length > 0 ? Math.max(...vals) : 0;
+  if (maxInSlot <= 3) return 1;
+  if (maxInSlot <= 5) return 0.85;
+  if (maxInSlot <= 7) return 0.75;
+  return 0.65;
+}
+
+// ─── 단일 반 HTML 조립 ───
+function buildClassHtml(ban) {
+  const students = (DB.enrollment || []).filter(s => s.ban === ban);
+  const gwandokStudents = GWANDOK_DB && GWANDOK_DB.students
+    ? GWANDOK_DB.students.filter(s => getClassFromHakbun(s.hakbun) === ban)
+    : null;
+
+  const slotMap = {};
+  students.forEach(s => {
+    (s.subjects || []).forEach(sub => {
+      const slots = FINAL_SCHEDULE[sub] || [];
+      slots.forEach(slot => {
+        if (!slotMap[slot]) slotMap[slot] = [];
+        slotMap[slot].push({ name: s.name, sub, hakbun: s.hakbun });
+      });
+    });
+  });
+
+  const totalStudents = students.length;
+  const maxPeriod = Math.max(...PERIODS);
+
+  let gwandokHtml = '';
+  if (gwandokStudents !== null) {
+    const chips = gwandokStudents.length > 0
+      ? gwandokStudents
+          .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun))
+          .map(g => {
+            const num = getNumFromHakbun(g.hakbun);
+            return `<span class="gwandok-chip"><span class="g-num">${num}번</span> ${esc(g.name)}</span>`;
+          }).join('')
+      : `<span class="gwandok-empty">이 반 학생 없음</span>`;
+    gwandokHtml = `<div class="gwandok-bar"><span class="gwandok-label">🏫 영생관독실</span>${chips}</div>`;
+  }
+
+  let html = `
+  <div class="class-header-bar">
+    <span class="class-title">${ban}반</span>
+    <span class="class-subtitle">특강 수강 학생 ${totalStudents}명</span>
+    <span class="total-badge${totalStudents === 0 ? ' zero' : ''}">
+      ${totalStudents > 0 ? `총 ${totalStudents}명 수강 중` : '수강 학생 없음'}
+    </span>
+  </div>
+  ${gwandokHtml}
+  <div class="tt-wrap">
+  <table class="tt">
+    <thead>
+      <tr>
+        <th class="period-head">교시</th>
+        ${DAYS.map(d => `<th>${d}요일</th>`).join('')}
+      </tr>
+    </thead>
+    <tbody>`;
+
+  for (let p = 1; p <= maxPeriod; p++) {
+    html += `<tr><td class="period-cell">${p}교시</td>`;
+    DAYS.forEach((day, di) => {
+      if (p > PERIODS[di]) {
+        html += `<td style="background:#F1F5F9;"></td>`;
+        return;
+      }
+      const slot = day + p;
+      const absentList = (slotMap[slot] || []).slice()
+        .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
+      html += `<td><div class="cell-inner">`;
+      if (absentList.length === 0) {
+        html += `<div class="no-absent">—</div>`;
+      } else {
+        absentList.forEach(item => {
+          const cls = SHORT_CLS[item.sub] || '';
+          const num = getNumFromHakbun(item.hakbun);
+          html += `<div class="student-chip">
+            <span class="chip-num">${num}번</span>
+            <span class="chip-name">${esc(item.name)}</span>
+            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>
+          </div>`;
+        });
+      }
+      html += `</div></td>`;
+    });
+    html += `</tr>`;
+  }
+
+  html += `</tbody></table></div>`;
+  return html;
+}
+
+// ─── 이 반만 인쇄 ───
 function setScale(btn, scale) {
   currentScale = scale;
   document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
@@ -341,29 +400,86 @@ function doPrint() {
   if (currentScale === 1) {
     dynStyle.textContent = '';
   } else {
-    dynStyle.textContent = `
-      @media print {
-        .main {
-          zoom: ${currentScale};
-          transform-origin: top left;
-        }
-      }`;
+    dynStyle.textContent = `@media print { .main { zoom:${currentScale}; transform-origin:top left; } }`;
   }
+  document.getElementById('printHeader').textContent =
+    `Final 특강 출석 안내 — ${currentBan}반 (${DATE_RANGE})`;
   window.print();
 }
 
+// ─── 전체 반 인쇄 (반별 자동 배율) ───
+function getFullPrintCSS() {
+  return `
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Apple SD Gothic Neo',Malgun Gothic,sans-serif;background:#fff;}
+    @page{size:A4 landscape;margin:8mm 10mm;}
+    .class-page{width:100%;transform-origin:top left;}
+    .page-break{page-break-after:always;}
+    .print-header{font-size:13px;font-weight:800;margin-bottom:6px;color:#1E293B;}
+    .class-header-bar{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+    .class-title{font-size:16px;font-weight:900;color:#1E293B;}
+    .class-subtitle{font-size:11px;color:#64748B;}
+    .total-badge{margin-left:auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .total-badge.zero{background:#F1F5F9;color:#94A3B8;border-color:#E2E8F0;}
+    .gwandok-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px;margin-bottom:8px;background:#EFF6FF;border:2px solid #93C5FD;border-left:4px solid #2563EB;border-radius:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .gwandok-label{font-size:13px;font-weight:900;color:#1D4ED8;white-space:nowrap;margin-right:4px;}
+    .gwandok-chip{display:inline-flex;align-items:center;gap:5px;background:#DBEAFE;color:#1E3A8A;border:1.5px solid #60A5FA;border-radius:20px;padding:4px 12px;font-size:13px;font-weight:800;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .gwandok-chip .g-num{font-size:11px;color:#2563EB;font-weight:700;}
+    .gwandok-empty{color:#93C5FD;font-style:italic;font-size:13px;}
+    .tt-wrap{overflow:visible;}
+    table.tt{border-collapse:collapse;width:100%;table-layout:fixed;border:2px solid #333 !important;border-radius:0;}
+    table.tt tbody tr{height:21mm;}
+    table.tt th,table.tt td{border:1px solid #777 !important;padding:5px 7px;vertical-align:top;width:calc((100% - 56px)/5);}
+    table.tt thead th{background:#1E1B4B !important;color:#fff !important;font-size:13px;font-weight:800;padding:6px 5px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    table.tt thead th.period-head{background:#312E81 !important;font-size:12px;width:56px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    table.tt tbody td.period-cell{font-size:13px;font-weight:900;text-align:center;background:#D1D5DB !important;color:#111 !important;border-right:2px solid #444 !important;width:56px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    table.tt tbody tr:nth-child(even) td:not(.period-cell){background:#F9FAFB !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .cell-inner{min-height:unset;}
+    .student-chip{display:flex;align-items:center;gap:4px;padding:3px 6px;margin:2px 0;border-radius:4px;background:#FEF3C7;border-left:3px solid #D97706;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .chip-num{font-size:12px;font-weight:800;color:#7C2D12;min-width:20px;text-align:right;white-space:nowrap;}
+    .chip-name{font-size:13px;font-weight:900;color:#7C2D12;white-space:nowrap;}
+    .chip-sub{font-size:11px;font-weight:800;padding:1px 5px;border-radius:8px;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .no-absent{color:#94A3B8;font-size:11px;text-align:center;padding:4px 0;}
+    .sub-국어{background:#C4B5FD;color:#3B0764;}
+    .sub-영어{background:#6EE7B7;color:#064E3B;}
+    .sub-수학{background:#FCA5A5;color:#7F1D1D;}
+    .sub-확통{background:#FCD34D;color:#713F12;}
+    .sub-사문{background:#F9A8D4;color:#500724;}
+    .sub-생윤{background:#7DD3FC;color:#0C2A4A;}
+    .sub-세지{background:#86EFAC;color:#14532D;}
+  `;
+}
+
+function printAll() {
+  if (!DB) { alert('데이터가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.'); return; }
+
+  const win = window.open('', '_blank', 'width=1200,height=800');
+
+  let pagesHtml = '';
+  for (let ban = 1; ban <= NUM_CLASSES; ban++) {
+    const zoom = calcAutoZoom(ban);
+    const zoomPct = Math.round(zoom * 100);
+    const isLast = (ban === NUM_CLASSES);
+    pagesHtml += `<div class="class-page${isLast ? '' : ' page-break'}" style="zoom:${zoom}">`;
+    pagesHtml += `<div class="print-header">Final 특강 출석 안내 — ${ban}반 (${DATE_RANGE}) <span style="font-size:11px;color:#94A3B8;font-weight:400">[자동 ${zoomPct}%]</span></div>`;
+    pagesHtml += buildClassHtml(ban);
+    pagesHtml += `</div>`;
+  }
+
+  win.document.write(`<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<title>Final 특강 출석 안내 — 전체 (1~${NUM_CLASSES}반)</title>
+<style>${getFullPrintCSS()}</style>
+</head><body>${pagesHtml}</body></html>`);
+  win.document.close();
+
+  // 렌더링 후 인쇄 대화상자 열기
+  setTimeout(() => { win.focus(); win.print(); }, 700);
+}
+
+// ─── 데이터 로드 ───
 document.getElementById('dateRange').textContent = DATE_RANGE;
-
-// 학번에서 반 추출: 학년(1) + 반(2자리) + 번호(2자리) = 5자리
-function getClassFromHakbun(hakbun) {
-  return parseInt(String(hakbun).slice(1, 3));
-}
-
-// 학번에서 번호 추출
-function getNumFromHakbun(hakbun) {
-  const s = String(hakbun);
-  return s.length >= 5 ? parseInt(s.slice(3)) : parseInt(hakbun) % 100;
-}
 
 function startTimer(updateFn) {
   const t0 = Date.now();
@@ -389,9 +505,7 @@ async function fetchWithRetry(url, maxTry = 2, timeout = 90000) {
       lastErr = (e.name === 'AbortError')
         ? new Error('Apps Script 응답 시간 초과 (콜드 스타트). 재시도 버튼을 눌러주세요.')
         : e;
-      if (i < maxTry) {
-        await new Promise(r => setTimeout(r, 2000));
-      }
+      if (i < maxTry) await new Promise(r => setTimeout(r, 2000));
     }
   }
   throw lastErr;
@@ -403,9 +517,7 @@ async function initLoad() {
   const stopTimer = startTimer(sec => {
     contentEl.innerHTML = `<div class="loading">⏳ Apps Script 응답 대기 중… ${sec}초</div>`;
   });
-
   try {
-    // 수강 명단 + 관독실 명단 동시 요청 (관독실은 실패해도 계속)
     const [enrollData, gwandokData] = await Promise.all([
       fetchWithRetry(SCRIPT_URL + '?type=enrollment'),
       fetchWithRetry(SCRIPT_URL + '?type=gwandok').catch(() => null)
@@ -455,113 +567,20 @@ function buildTabs() {
 
 function renderClass(ban) {
   if (!DB) return;
-
-  // 이 반의 수강 학생 목록
-  const students = (DB.enrollment || []).filter(s => s.ban === ban);
-
-  // 이 반의 관독실 학생 목록
-  const gwandokStudents = GWANDOK_DB && GWANDOK_DB.students
-    ? GWANDOK_DB.students.filter(s => getClassFromHakbun(s.hakbun) === ban)
-    : null; // null = 데이터 미로드, [] = 이 반 학생 없음
-
-  // 슬롯별 결석 학생 맵: {슬롯: [{name, sub, hakbun}]}
-  const slotMap = {};
-  students.forEach(s => {
-    (s.subjects || []).forEach(sub => {
-      const slots = FINAL_SCHEDULE[sub] || [];
-      slots.forEach(slot => {
-        if (!slotMap[slot]) slotMap[slot] = [];
-        slotMap[slot].push({ name: s.name, sub, hakbun: s.hakbun });
-      });
-    });
-  });
-
-  const totalStudents = students.length;
-
-  // 인쇄 헤더
   document.getElementById('printHeader').textContent =
     `Final 특강 출석 안내 — ${ban}반 (${DATE_RANGE})`;
 
-  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  let html = buildClassHtml(ban);
 
-  // 영생관독실 배너
-  let gwandokHtml = '';
-  if (gwandokStudents !== null) {
-    const chips = gwandokStudents.length > 0
-      ? gwandokStudents
-          .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun))
-          .map(g => {
-            const num = getNumFromHakbun(g.hakbun);
-            return `<span class="gwandok-chip"><span class="g-num">${num}번</span> ${esc(g.name)}</span>`;
-          }).join('')
-      : `<span class="gwandok-empty">이 반 학생 없음</span>`;
-    gwandokHtml = `<div class="gwandok-bar"><span class="gwandok-label">🏫 영생관독실</span>${chips}</div>`;
-  }
-
-  // 테이블 생성
-  const maxPeriod = Math.max(...PERIODS); // 7
-
-  let html = `
-  <div class="class-header-bar">
-    <span class="class-title">${ban}반</span>
-    <span class="class-subtitle">특강 수강 학생 ${totalStudents}명</span>
-    <span class="total-badge${totalStudents === 0 ? ' zero' : ''}">
-      ${totalStudents > 0 ? `총 ${totalStudents}명 수강 중` : '수강 학생 없음'}
-    </span>
-  </div>
-  ${gwandokHtml}
-  <div class="tt-wrap">
-  <table class="tt">
-    <thead>
-      <tr>
-        <th class="period-head">교시</th>
-        ${DAYS.map(d => `<th>${d}요일</th>`).join('')}
-      </tr>
-    </thead>
-    <tbody>`;
-
-  for (let p = 1; p <= maxPeriod; p++) {
-    html += `<tr><td class="period-cell">${p}교시</td>`;
-    DAYS.forEach((day, di) => {
-      if (p > PERIODS[di]) {
-        // 이 요일에 이 교시 없음 — 빈 셀
-        html += `<td style="background:#F1F5F9;"></td>`;
-        return;
-      }
-      const slot = day + p;
-      const absentList = slotMap[slot] || [];
-      html += `<td><div class="cell-inner">`;
-      if (absentList.length === 0) {
-        html += `<div class="no-absent">—</div>`;
-      } else {
-        // 번호 순 정렬
-        absentList.sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
-        absentList.forEach(item => {
-          const cls = SHORT_CLS[item.sub] || '';
-          const num = getNumFromHakbun(item.hakbun);
-          html += `<div class="student-chip">
-            <span class="chip-num">${num}번</span>
-            <span class="chip-name">${esc(item.name)}</span>
-            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>
-          </div>`;
-        });
-      }
-      html += `</div></td>`;
-    });
-    html += `</tr>`;
-  }
-
-  html += `</tbody></table></div>`;
-
-  // 수강 중인 학생 목록 (하단 요약 — 인쇄 시 숨김)
+  // 하단 학생 목록 (화면 전용, 인쇄 숨김)
+  const students = (DB.enrollment || []).filter(s => s.ban === ban);
   if (students.length > 0) {
     html += `<div class="student-list-section" style="margin-top:16px;background:#fff;border:1px solid var(--border);
       border-radius:10px;padding:12px 16px;">
       <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px">
         ${ban}반 수강 학생 전체 목록
       </div>`;
-    students
-      .slice()
+    students.slice()
       .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun))
       .forEach(s => {
         const num = getNumFromHakbun(s.hakbun);
