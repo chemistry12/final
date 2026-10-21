@@ -163,6 +163,11 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   font-size:10px; font-weight:800; padding:1px 5px;
   border-radius:8px; white-space:nowrap;
 }
+/* 연속 교시 표시 배지 */
+.chip-span {
+  font-size:9px; font-weight:700; color:#94A3B8;
+  margin-left:1px; white-space:nowrap;
+}
 
 /* 과목 색 */
 .sub-국어    { background:#C4B5FD; color:#3B0764; }
@@ -203,6 +208,7 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   .chip-num { font-size:12px; }
   .chip-name { font-size:13px; }
   .chip-sub { font-size:11px; padding:1px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .chip-span { font-size:9px; }
   .no-absent { padding:4px 0; font-size:11px; }
 }
 .print-header { display:none; font-size:13px; font-weight:800; padding:6px 0 10px; color:#1E293B; }
@@ -283,7 +289,6 @@ function getNumFromHakbun(hakbun) {
 }
 
 // ─── 반별 자동 배율 계산 ───
-// 한 슬롯에 최대 몇 명이 있는지 보고 결정
 function calcAutoZoom(ban) {
   if (!DB) return 1;
   const students = (DB.enrollment || []).filter(s => s.ban === ban);
@@ -310,6 +315,7 @@ function buildClassHtml(ban) {
     ? GWANDOK_DB.students.filter(s => getClassFromHakbun(s.hakbun) === ban)
     : null;
 
+  // slotMap 구성
   const slotMap = {};
   students.forEach(s => {
     (s.subjects || []).forEach(sub => {
@@ -319,6 +325,33 @@ function buildClassHtml(ban) {
         slotMap[slot].push({ name: s.name, sub, hakbun: s.hakbun });
       });
     });
+  });
+
+  // ─── 연속 교시 병합 처리 ───
+  // 같은 날 연달아 같은 과목인 학생 → 첫 교시에만 표시, chip.spanEnd 마킹
+  const skipSet = new Set(); // "요일|교시|학번|과목" 형태
+  DAYS.forEach((day, di) => {
+    for (let p = 1; p <= PERIODS[di]; p++) {
+      const slot = day + p;
+      (slotMap[slot] || []).forEach(chip => {
+        if (chip.spanEnd !== undefined) return; // 이미 처리됨
+        // 연속 교시 끝 탐색
+        let end = p;
+        while (end < PERIODS[di]) {
+          const nextSlot = day + (end + 1);
+          const nextChips = slotMap[nextSlot] || [];
+          const found = nextChips.some(c => c.hakbun === chip.hakbun && c.sub === chip.sub);
+          if (found) end++;
+          else break;
+        }
+        if (end > p) {
+          chip.spanEnd = end; // 이 교시~end교시까지 연속
+          for (let q = p + 1; q <= end; q++) {
+            skipSet.add(`${day}|${q}|${chip.hakbun}|${chip.sub}`);
+          }
+        }
+      });
+    }
   });
 
   const totalStudents = students.length;
@@ -364,7 +397,10 @@ function buildClassHtml(ban) {
         return;
       }
       const slot = day + p;
-      const absentList = (slotMap[slot] || []).slice()
+      // 연속 교시 병합: skipSet에 있는 칩은 이미 앞 교시에 표시됨
+      const absentList = (slotMap[slot] || [])
+        .filter(item => !skipSet.has(`${day}|${p}|${item.hakbun}|${item.sub}`))
+        .slice()
         .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
       html += `<td><div class="cell-inner">`;
       if (absentList.length === 0) {
@@ -373,10 +409,13 @@ function buildClassHtml(ban) {
         absentList.forEach(item => {
           const cls = SHORT_CLS[item.sub] || '';
           const num = getNumFromHakbun(item.hakbun);
+          const spanLabel = item.spanEnd !== undefined
+            ? `<span class="chip-span">~${item.spanEnd}교시</span>`
+            : '';
           html += `<div class="student-chip">
             <span class="chip-num">${num}번</span>
             <span class="chip-name">${esc(item.name)}</span>
-            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>
+            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>${spanLabel}
           </div>`;
         });
       }
@@ -440,6 +479,7 @@ function getFullPrintCSS() {
     .chip-num{font-size:12px;font-weight:800;color:#7C2D12;min-width:20px;text-align:right;white-space:nowrap;}
     .chip-name{font-size:13px;font-weight:900;color:#7C2D12;white-space:nowrap;}
     .chip-sub{font-size:11px;font-weight:800;padding:1px 5px;border-radius:8px;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .chip-span{font-size:9px;font-weight:700;color:#94A3B8;margin-left:1px;white-space:nowrap;}
     .no-absent{color:#94A3B8;font-size:11px;text-align:center;padding:4px 0;}
     .sub-국어{background:#C4B5FD;color:#3B0764;}
     .sub-영어{background:#6EE7B7;color:#064E3B;}
