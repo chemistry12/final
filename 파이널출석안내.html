@@ -163,10 +163,18 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   font-size:10px; font-weight:800; padding:1px 5px;
   border-radius:8px; white-space:nowrap;
 }
-/* 연속 교시 표시 배지 */
-.chip-span {
-  font-size:9px; font-weight:700; color:#94A3B8;
-  margin-left:1px; white-space:nowrap;
+
+/* 연속 교시 병합 칸 표시 */
+.merged-period-label {
+  font-size:12px; font-weight:800; color:#1E293B;
+  text-align:center; letter-spacing:.03em;
+  margin-bottom:4px; padding-bottom:4px;
+  border-bottom:1px dashed #CBD5E1;
+}
+/* 병합된 td — 배경 약간 구분 */
+td.merged-cell {
+  background:#FFFBF0 !important;
+  border-left:3px solid #FCD34D !important;
 }
 
 /* 과목 색 */
@@ -180,7 +188,6 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
 
 /* ── 단일 반 인쇄 ── */
 @media print {
-  /* margin:0 — 브라우저 인쇄 여백 설정과 무관하게 padding으로 여백 처리 */
   @page { size: A4 landscape; margin: 0; }
   .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
   body { background:#fff; }
@@ -203,12 +210,13 @@ table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
   table.tt tbody td.period-cell { font-size:13px; font-weight:900; text-align:center; background:#D1D5DB !important; color:#111 !important; border-right:2px solid #444 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   table.tt tbody tr:hover td { background:inherit; }
   table.tt tbody tr:nth-child(even) td:not(.period-cell) { background:#F9FAFB !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  td.merged-cell { background:#FFFBF0 !important; border-left:3px solid #FCD34D !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   .cell-inner { min-height:unset; }
   .student-chip { padding:3px 6px; margin:2px 0; border-radius:4px; border-left-width:3px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   .chip-num { font-size:12px; }
   .chip-name { font-size:13px; }
   .chip-sub { font-size:11px; padding:1px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  .chip-span { font-size:9px; }
+  .merged-period-label { font-size:11px; }
   .no-absent { padding:4px 0; font-size:11px; }
 }
 .print-header { display:none; font-size:13px; font-weight:800; padding:6px 0 10px; color:#1E293B; }
@@ -327,30 +335,38 @@ function buildClassHtml(ban) {
     });
   });
 
-  // ─── 연속 교시 병합 처리 ───
-  // 같은 날 연달아 같은 과목인 학생 → 첫 교시에만 표시, chip.spanEnd 마킹
-  const skipSet = new Set(); // "요일|교시|학번|과목" 형태
+  // ─── 연속 교시 병합 계산 ───
+  // skipSet: 앞 교시에 이미 표시되어 이 교시에서 숨길 칩
+  // colRowspan[di|p]: 이 셀이 rowspan=2 로 아래 행까지 차지
+  // colSkip[di|p]: 이 td를 생성하지 않음 (위 셀의 rowspan이 커버)
+  const skipSet   = new Set();
+  const colRowspan = {};
+  const colSkip    = {};
+
   DAYS.forEach((day, di) => {
-    for (let p = 1; p <= PERIODS[di]; p++) {
-      const slot = day + p;
-      (slotMap[slot] || []).forEach(chip => {
-        if (chip.spanEnd !== undefined) return; // 이미 처리됨
-        // 연속 교시 끝 탐색
-        let end = p;
-        while (end < PERIODS[di]) {
-          const nextSlot = day + (end + 1);
-          const nextChips = slotMap[nextSlot] || [];
-          const found = nextChips.some(c => c.hakbun === chip.hakbun && c.sub === chip.sub);
-          if (found) end++;
-          else break;
-        }
-        if (end > p) {
-          chip.spanEnd = end; // 이 교시~end교시까지 연속
-          for (let q = p + 1; q <= end; q++) {
-            skipSet.add(`${day}|${q}|${chip.hakbun}|${chip.sub}`);
-          }
-        }
-      });
+    for (let p = 1; p < PERIODS[di]; p++) {
+      const slot     = day + p;
+      const nextSlot = day + (p + 1);
+      const chips     = slotMap[slot]     || [];
+      const nextChips = slotMap[nextSlot] || [];
+
+      if (chips.length === 0) continue;
+
+      // 현재 교시의 모든 칩이 다음 교시에도 같은 과목으로 등장하는지 확인
+      const nextKeySet = new Set(nextChips.map(c => `${c.hakbun}|${c.sub}`));
+      const allContinue = chips.every(c => nextKeySet.has(`${c.hakbun}|${c.sub}`));
+
+      // 다음 교시에 새로 등장하는 칩(현재 교시에 없는 칩)이 없는지 확인
+      const currKeySet = new Set(chips.map(c => `${c.hakbun}|${c.sub}`));
+      const noNewInNext = nextChips.every(c => currKeySet.has(`${c.hakbun}|${c.sub}`));
+
+      if (allContinue && noNewInNext && nextChips.length > 0) {
+        // 완전히 동일한 학생들 → rowspan=2 병합
+        colRowspan[`${di}|${p}`] = 2;
+        colSkip[`${di}|${p+1}`] = true;
+        // 다음 교시 칩을 skipSet에 추가 (혹시 다른 로직에서 사용될 경우 대비)
+        nextChips.forEach(c => skipSet.add(`${day}|${p+1}|${c.hakbun}|${c.sub}`));
+      }
     }
   });
 
@@ -396,26 +412,40 @@ function buildClassHtml(ban) {
         html += `<td style="background:#F1F5F9;"></td>`;
         return;
       }
+
+      // 이 td를 건너뜀 (위 셀의 rowspan이 이미 차지)
+      if (colSkip[`${di}|${p}`]) return;
+
+      const rowspan  = colRowspan[`${di}|${p}`] || 1;
+      const isMerged = rowspan > 1;
       const slot = day + p;
-      // 연속 교시 병합: skipSet에 있는 칩은 이미 앞 교시에 표시됨
+
       const absentList = (slotMap[slot] || [])
         .filter(item => !skipSet.has(`${day}|${p}|${item.hakbun}|${item.sub}`))
         .slice()
         .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
-      html += `<td><div class="cell-inner">`;
+
+      const rowspanAttr = isMerged ? ` rowspan="${rowspan}"` : '';
+      const mergedClass = isMerged ? ' merged-cell' : '';
+
+      html += `<td${rowspanAttr} class="${mergedClass.trim()}"><div class="cell-inner">`;
+
+      if (isMerged) {
+        // 병합 칸 상단에 교시 범위 표시
+        const endP = p + rowspan - 1;
+        html += `<div class="merged-period-label">${p}~${endP}교시</div>`;
+      }
+
       if (absentList.length === 0) {
         html += `<div class="no-absent">—</div>`;
       } else {
         absentList.forEach(item => {
           const cls = SHORT_CLS[item.sub] || '';
           const num = getNumFromHakbun(item.hakbun);
-          const spanLabel = item.spanEnd !== undefined
-            ? `<span class="chip-span">~${item.spanEnd}교시</span>`
-            : '';
           html += `<div class="student-chip">
             <span class="chip-num">${num}번</span>
             <span class="chip-name">${esc(item.name)}</span>
-            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>${spanLabel}
+            <span class="chip-sub ${cls}">${esc(SHORT[item.sub] || item.sub)}</span>
           </div>`;
         });
       }
@@ -447,7 +477,7 @@ function doPrint() {
   window.print();
 }
 
-// ─── 전체 반 인쇄 (반별 자동 배율) ───
+// ─── 전체 반 인쇄 ───
 function getFullPrintCSS() {
   return `
     *{box-sizing:border-box;margin:0;padding:0;}
@@ -474,12 +504,13 @@ function getFullPrintCSS() {
     table.tt thead th.period-head{background:#312E81 !important;font-size:12px;width:56px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     table.tt tbody td.period-cell{font-size:13px;font-weight:900;text-align:center;background:#D1D5DB !important;color:#111 !important;border-right:2px solid #444 !important;width:56px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     table.tt tbody tr:nth-child(even) td:not(.period-cell){background:#F9FAFB !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    td.merged-cell{background:#FFFBF0 !important;border-left:3px solid #FCD34D !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .cell-inner{min-height:unset;}
+    .merged-period-label{font-size:11px;font-weight:800;color:#1E293B;text-align:center;letter-spacing:.03em;margin-bottom:4px;padding-bottom:4px;border-bottom:1px dashed #CBD5E1;}
     .student-chip{display:flex;align-items:center;gap:4px;padding:3px 6px;margin:2px 0;border-radius:4px;background:#FEF3C7;border-left:3px solid #D97706;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .chip-num{font-size:12px;font-weight:800;color:#7C2D12;min-width:20px;text-align:right;white-space:nowrap;}
     .chip-name{font-size:13px;font-weight:900;color:#7C2D12;white-space:nowrap;}
     .chip-sub{font-size:11px;font-weight:800;padding:1px 5px;border-radius:8px;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-    .chip-span{font-size:9px;font-weight:700;color:#94A3B8;margin-left:1px;white-space:nowrap;}
     .no-absent{color:#94A3B8;font-size:11px;text-align:center;padding:4px 0;}
     .sub-국어{background:#C4B5FD;color:#3B0764;}
     .sub-영어{background:#6EE7B7;color:#064E3B;}
@@ -515,7 +546,6 @@ function printAll() {
 </head><body>${pagesHtml}</body></html>`);
   win.document.close();
 
-  // 렌더링 후 인쇄 대화상자 열기
   setTimeout(() => { win.focus(); win.print(); }, 700);
 }
 
