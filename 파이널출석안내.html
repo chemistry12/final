@@ -131,7 +131,7 @@ table.tt {
   box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
 table.tt th, table.tt td {
-  border:1px solid #CBD5E1; padding:6px 8px; vertical-align:top;
+  border:1.5px solid #94A3B8; padding:6px 8px; vertical-align:top;
   width:calc((100% - 56px) / 5);
 }
 table.tt thead th {
@@ -144,7 +144,7 @@ table.tt thead th.period-head {
 table.tt tbody td.period-cell {
   background:#F1F5F9; text-align:center;
   font-size:13px; font-weight:800; color:#334155; width:56px;
-  border-right:2px solid #94A3B8;
+  border-right:2.5px solid #64748B;
 }
 table.tt tbody tr:hover td { background:#FAFAFE; }
 table.tt tbody tr:hover td.period-cell { background:#E9EEF5; }
@@ -186,10 +186,38 @@ td.merged-cell {
 .sub-생윤    { background:#7DD3FC; color:#0C2A4A; }
 .sub-세지    { background:#86EFAC; color:#14532D; }
 
+/* ── 신청 과목 현황 섹션 ── */
+.subject-list-section {
+  margin-top:12px;
+  border:1px solid #E2E8F0; border-radius:8px; overflow:hidden;
+}
+.subject-list-header {
+  background:#F1F5F9; padding:7px 14px;
+  font-size:12px; font-weight:800; color:#334155;
+  border-bottom:1px solid #E2E8F0;
+  display:flex; align-items:center; gap:6px;
+}
+.subject-list-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:0;
+}
+.subject-list-row {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  padding:5px 12px; border-bottom:1px solid #F1F5F9;
+  border-right:1px solid #F1F5F9;
+}
+.subject-list-row:nth-child(2n) { border-right:none; }
+.srow-num { font-size:11px; font-weight:800; color:#64748B; min-width:26px; }
+.srow-name { font-size:12px; font-weight:900; color:#1E293B; min-width:44px; }
+.srow-subs { display:flex; gap:3px; flex-wrap:wrap; }
+.srow-badge {
+  font-size:10px; font-weight:800; padding:1px 6px; border-radius:8px;
+}
+
 /* ── 단일 반 인쇄 ── */
 @media print {
   @page { size: A4 landscape; margin: 0; }
-  .topbar, .class-tabs, .student-list-section, .site-nav { display:none !important; }
+  .topbar, .class-tabs, .site-nav { display:none !important; }
   body { background:#fff; }
   .main { padding:10mm 12mm !important; max-width:none !important; margin:0 !important; width:100% !important; box-sizing:border-box !important; }
   .print-header { display:block !important; font-size:13px; font-weight:800; margin-bottom:6px; color:#1E293B; }
@@ -218,6 +246,13 @@ td.merged-cell {
   .chip-sub { font-size:11px; padding:1px 5px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   .merged-period-label { font-size:11px; }
   .no-absent { padding:4px 0; font-size:11px; }
+  /* 신청 과목 현황 인쇄 */
+  .subject-list-section { margin-top:8px; border:1px solid #CBD5E1; border-radius:4px; }
+  .subject-list-header { padding:4px 10px; font-size:11px; background:#F1F5F9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .subject-list-row { padding:3px 8px; }
+  .srow-num { font-size:10px; }
+  .srow-name { font-size:11px; }
+  .srow-badge { font-size:9px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
 .print-header { display:none; font-size:13px; font-weight:800; padding:6px 0 10px; color:#1E293B; }
 </style>
@@ -455,6 +490,35 @@ function buildClassHtml(ban) {
   }
 
   html += `</tbody></table></div>`;
+
+  // ─── 신청 과목 현황 섹션 ───
+  const sortedStudents = students
+    .slice()
+    .sort((a, b) => getNumFromHakbun(a.hakbun) - getNumFromHakbun(b.hakbun));
+
+  if (sortedStudents.length > 0) {
+    html += `<div class="subject-list-section">`;
+    html += `<div class="subject-list-header">📚 학생별 신청 과목 현황</div>`;
+    html += `<div class="subject-list-grid">`;
+    sortedStudents.forEach(s => {
+      const num = getNumFromHakbun(s.hakbun);
+      const subs = (s.subjects || []).sort((a, b) => {
+        const order = ['국어','영어','수학','확률과 통계','사회문화','생활과 윤리','세계지리'];
+        return order.indexOf(a) - order.indexOf(b);
+      });
+      const badges = subs.map(sub => {
+        const cls = SHORT_CLS[sub] || '';
+        return `<span class="srow-badge ${cls}">${esc(SHORT[sub] || sub)}</span>`;
+      }).join('');
+      html += `<div class="subject-list-row">
+        <span class="srow-num">${num}번</span>
+        <span class="srow-name">${esc(s.name)}</span>
+        <span class="srow-subs">${badges}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
   return html;
 }
 
@@ -519,6 +583,15 @@ function getFullPrintCSS() {
     .sub-사문{background:#F9A8D4;color:#500724;}
     .sub-생윤{background:#7DD3FC;color:#0C2A4A;}
     .sub-세지{background:#86EFAC;color:#14532D;}
+    .subject-list-section{margin-top:8px;border:1px solid #CBD5E1;border-radius:4px;overflow:hidden;}
+    .subject-list-header{background:#F1F5F9 !important;padding:4px 10px;font-size:11px;font-weight:800;color:#334155;border-bottom:1px solid #CBD5E1;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .subject-list-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+    .subject-list-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:3px 8px;border-bottom:1px solid #F1F5F9;border-right:1px solid #F1F5F9;}
+    .subject-list-row:nth-child(2n){border-right:none;}
+    .srow-num{font-size:10px;font-weight:800;color:#64748B;min-width:24px;}
+    .srow-name{font-size:11px;font-weight:900;color:#1E293B;min-width:40px;}
+    .srow-subs{display:flex;gap:3px;flex-wrap:wrap;}
+    .srow-badge{font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   `;
 }
 
