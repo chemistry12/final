@@ -214,6 +214,7 @@ body{
     <div class="btns">
       <a class="btn-p" href="https://docs.google.com/spreadsheets/d/1pxx_kiTWDcA9Y3VM4BfeLsWx1ZuSlgPewVXVVkK_-j4/edit?gid=979638191#gid=979638191" target="_blank">시트 열기</a>
       <button class="btn-p admin-only" onclick="copyAllMsgs()">전체 문구 복사</button>
+      <button class="btn-p admin-only" onclick="saveAllImages(this)">전체 이미지 저장(zip)</button>
       <button class="btn-p" onclick="printChanged()">변경된 선생님 전체 인쇄</button>
       <button class="btn-p solid" onclick="printCurrent()">이 선생님 인쇄</button>
     </div>
@@ -224,6 +225,8 @@ body{
 <div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════
 //  기본 설정 (바꿀 때는 여기만 수정)
@@ -231,6 +234,7 @@ body{
 const TITLE      = '수능대비 파이널 모의고사';
 const DATE_LABEL = '11월 16일 월요일';   // 화면과 인쇄에 표시
 const DATE_SHORT = '11월 16일(월)';      // 메신저 문구에 사용
+const PAGE_URL   = 'https://chemistry12.github.io/final/1116.html';  // 메신저 문구에 넣을 조회 링크
 
 // 주소 끝에 ?admin 을 붙여 열면 메신저 문구가 보입니다 (예: 1116.html?admin)
 const ADMIN = new URLSearchParams(location.search).has('admin');
@@ -427,11 +431,15 @@ function buildMsg(name){
   const lines = diffs.map(p =>
     p + '교시: ' + (DB.before[name][p-1] ? msgBefore(DB.before[name][p-1]) + ' → ' : '') + msgAfter(DB.after[name][p-1])
   );
-  return '[' + DATE_SHORT + ' 시간표 변경 안내]\n'
-    + name + ' 선생님, ' + TITLE + '로 ' + DATE_SHORT + ' 하루만 시간표가 아래와 같이 변경됩니다.\n\n'
+  return name + ' 선생님\n\n'
+    + '[' + DATE_SHORT + ' 시간표 변경 안내]\n'
+    + '선생님, 안녕하세요.\n'
+    + TITLE + '로 ' + DATE_SHORT + ' 하루만 시간표가 아래와 같이 변경됩니다.\n\n'
     + exLines
     + (lines.length ? '[바뀐 수업]\n' + lines.join('\n') + '\n\n' : '')
-    + '나머지 교시는 원래 시간표대로입니다. 감사합니다.';
+    + '나머지 교시는 원래 시간표대로입니다.\n'
+    + '교사 시간표 조회: ' + PAGE_URL + '\n\n'
+    + '감사합니다.';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -577,7 +585,7 @@ function buildDoc(name){
     </div>`).join('');
 
   const notes = notesFor(name);
-  const cnt = [exams.length ? '모의고사 감독 ' + exams.length + '회' : '', diffs.length ? '수업 변경 ' + diffs.length + '개' : ''].filter(Boolean).join(', ') || '변경 없음';
+  const cnt = diffs.length ? '수업 변경 ' + diffs.length + '개' : '';
   return `<div class="paper">
     <div class="doc-title">${esc(TITLE)} 시간표 변경 안내</div>
     <div class="doc-meta">
@@ -604,7 +612,9 @@ function select(name){
   document.getElementById('content').innerHTML = buildDoc(name) + (ADMIN ? `
     <div class="msg">
       <div class="msg-hd">메신저 안내 문구 (관리자만 보임)
-        <button class="btn-p solid" onclick="copyMsg()">복사하기</button>
+        <button class="btn-p" onclick="copyImage()" style="margin-left:auto">이미지 복사</button>
+        <button class="btn-p" onclick="saveImage()" style="margin-left:6px">이미지 저장</button>
+        <button class="btn-p solid" onclick="copyMsg()" style="margin-left:6px">문구 복사</button>
       </div>
       <div class="msg-body">${esc(buildMsg(name))}</div>
     </div>` : '');
@@ -632,6 +642,75 @@ async function copyMsg(){
   await copyText(buildMsg(cur));
   showToast(cur + ' 선생님 문구를 복사했습니다');
 }
+// ══════════════════════════════════════════════════════════════
+//  이미지 (메신저 첨부용 스크린샷, 관리자 화면에서만 버튼이 보임)
+// ══════════════════════════════════════════════════════════════
+async function renderImage(name){
+  await document.fonts.ready;
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:-10000px;top:0;width:820px;background:#fff';
+  box.innerHTML = buildDoc(name);
+  document.body.appendChild(box);
+  const paper = box.querySelector('.paper');
+  paper.style.boxShadow = 'none';
+  try{
+    return await html2canvas(paper, {scale:2, backgroundColor:'#ffffff', logging:false});
+  } finally {
+    box.remove();
+  }
+}
+function fileName(name){ return name + '_11월16일_시간표.png'; }
+function canvasBlob(canvas){ return new Promise(r => canvas.toBlob(r, 'image/png')); }
+function downloadBlob(blob, fname){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+async function saveImage(){
+  if(!cur) return;
+  showToast('이미지를 만드는 중...');
+  const blob = await canvasBlob(await renderImage(cur));
+  downloadBlob(blob, fileName(cur));
+  showToast(cur + ' 선생님 이미지를 저장했습니다');
+}
+async function copyImage(){
+  if(!cur) return;
+  showToast('이미지를 만드는 중...');
+  // 클릭 직후 바로 클립보드에 '만들어질 이미지'를 넘겨야 브라우저가 막지 않습니다
+  const blobPromise = renderImage(cur).then(canvasBlob);
+  try{
+    window.focus();
+    await navigator.clipboard.write([new ClipboardItem({'image/png': blobPromise})]);
+    showToast('이미지를 복사했습니다. 메신저 대화창에서 Ctrl+V 하세요');
+  }catch(e){
+    try{
+      const blob = await blobPromise;
+      await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+      showToast('이미지를 복사했습니다. 메신저 대화창에서 Ctrl+V 하세요');
+    }catch(e2){
+      console.error(e, e2);
+      showToast('복사가 막혔습니다. [이미지 저장]으로 파일을 받아 첨부해 주세요');
+    }
+  }
+}
+async function saveAllImages(btn){
+  const list = DB.teachers.filter(t => DB.diffs[t].length).sort((a,b) => rank(b) - rank(a));
+  const zip = new JSZip();
+  const old = btn.textContent;
+  btn.disabled = true;
+  for(let i = 0; i < list.length; i++){
+    btn.textContent = `만드는 중 ${i+1}/${list.length}`;
+    zip.file(fileName(list[i]), await canvasBlob(await renderImage(list[i])));
+  }
+  btn.textContent = '압축 중...';
+  downloadBlob(await zip.generateAsync({type:'blob'}), '11월16일_시간표_변경_' + list.length + '명.zip');
+  btn.textContent = old;
+  btn.disabled = false;
+  showToast(list.length + '명 이미지를 zip으로 저장했습니다');
+}
+
 async function copyAllMsgs(){
   const list = DB.teachers.filter(t => DB.diffs[t].length);
   const text = list.map(buildMsg).join('\n\n────────────────\n\n');
