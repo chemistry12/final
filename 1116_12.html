@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>11월 16일 시간표 변경</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* ── 공문식: 흰 종이, 검은 선, 바뀐 칸만 노랑 ── */
+:root{
+  --bg:#E9EAEC; --paper:#FFFFFF; --side:#FFFFFF;
+  --ink:#111111; --text:#222222; --muted:#666666; --faint:#AAAAAA;
+  --rule:#111111; --rule2:#888888; --head:#EDEDED;
+  --hl:#FFE866; --blue:#0033CC;
+  --font:'Noto Sans KR',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100vh;background:var(--bg)}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);
+  display:flex;height:100vh;overflow:hidden;font-size:14px;
+}
+
+/* ── 왼쪽 목록 ── */
+.sb{width:176px;min-width:176px;background:var(--side);border-right:1px solid #CFCFCF;display:flex;flex-direction:column;overflow:hidden}
+.sb-hd{padding:16px 14px 8px;border-bottom:1px solid #DDD}
+.sb-title{font-size:14px;font-weight:800;color:var(--ink)}
+.sb-cnt{font-size:12px;color:var(--muted);margin-top:2px}
+.sb-srch{padding:8px 10px 4px}
+.sb-srch input{width:100%;border:1px solid #BBB;border-radius:3px;font-size:13px;padding:6px 8px;outline:none;font-family:var(--font)}
+.sb-srch input:focus{border-color:var(--ink)}
+.sb-filter{padding:4px 10px 8px;border-bottom:1px solid #DDD}
+.btn-sort{width:100%;font-family:var(--font);font-size:12px;font-weight:700;background:#fff;border:1px solid #999;border-radius:3px;color:var(--ink);padding:5px 8px;cursor:pointer}
+.btn-sort.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.sb-list{overflow-y:auto;flex:1}
+.grp{font-size:11px;font-weight:800;color:var(--muted);padding:10px 14px 4px;background:#F5F5F5;border-bottom:1px solid #E3E3E3}
+.ti{padding:7px 14px;font-size:14px;color:var(--text);cursor:pointer;border-bottom:1px solid #EFEFEF;display:flex;align-items:center}
+.ti:hover{background:#F6F6F6}
+.ti.on{background:var(--ink);color:#fff;font-weight:700}
+.ti.dim{color:var(--faint)}
+.ti .bd{margin-left:auto;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:3px;color:#fff;line-height:1.5}
+.bd.sup{background:#C62828}
+.bd.chg{background:#1E4FD8}
+.ti.on .bd{box-shadow:0 0 0 1px #fff}
+
+/* ── 상단 버튼줄 ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid #CFCFCF;padding:9px 18px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.top-sub{font-size:13px;color:var(--muted);font-weight:500}
+.btns{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn-p{font-family:var(--font);font-size:13px;font-weight:700;padding:6px 12px;border-radius:3px;cursor:pointer;text-decoration:none;background:#fff;color:var(--ink);border:1px solid #999;display:inline-flex;align-items:center}
+.btn-p:hover{background:#F3F3F3}
+.btn-p.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.admin-only{display:none!important}
+.admin .admin-only{display:inline-flex!important}
+
+/* ── 종이 ── */
+.content{flex:1;overflow-y:auto;padding:16px}
+.paper{background:var(--paper);max-width:820px;margin:0 auto;padding:26px 34px 24px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+
+.doc-title{text-align:center;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.doc-meta{display:flex;justify-content:space-between;align-items:flex-end;margin:14px 0 6px;font-size:14px}
+.doc-meta .who{font-size:18px;font-weight:800;color:var(--ink)}
+.doc-meta .when{font-weight:700;color:var(--ink)}
+.doc-meta .cnt{font-size:12.5px;color:var(--muted);margin-left:8px;font-weight:500}
+
+.tt{border-collapse:collapse;width:100%;table-layout:fixed;border-top:2px solid var(--rule);border-bottom:2px solid var(--rule)}
+.tt th,.tt td{border:1px solid var(--rule2);text-align:center;vertical-align:middle}
+.tt tr > :first-child{border-left:none}
+.tt tr > :last-child{border-right:none}
+.tt thead th{background:var(--head);font-size:14px;font-weight:800;color:var(--ink);padding:8px 4px;border-bottom:1.5px solid var(--rule)}
+.tt th.h-p{width:64px}
+.tt .mid{border-right:1.5px solid var(--rule)}
+.pd{font-size:14px;font-weight:700;color:var(--ink);background:#F7F7F7}
+.slot{height:50px;padding:3px 8px}
+.cs{display:block;font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.3;word-break:keep-all}
+.cr{display:block;font-size:13px;font-weight:500;color:var(--ink);line-height:1.3}
+.pd.on{background:var(--ink);color:#fff}
+.empty{color:#BBB}
+.slot.now{background:var(--hl)}
+.slot.now .cs{font-size:16px;font-weight:800;color:var(--blue)}
+.slot.now .cr{font-size:14.5px;font-weight:800;color:var(--blue)}
+.none-txt{font-size:14px;font-weight:800;color:var(--blue)}
+
+.sum{border:2px solid var(--ink);margin:0 0 12px;padding:9px 14px;background:#FFFBE0}
+.sum-t{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:4px}
+.sum-row{display:flex;gap:10px;align-items:baseline;font-size:15px;line-height:1.75;flex-wrap:wrap}
+.sum-p{flex:0 0 46px;font-weight:800;color:var(--ink)}
+.sum-b{color:var(--ink)}
+.sum-a{font-weight:800;color:var(--blue)}
+.sum-x{color:#999}
+.tl{--k:1.12;border-top:2px solid var(--rule);border-bottom:2px solid var(--rule)}
+.tl-hd{display:grid;grid-template-columns:86px 1fr 1fr;background:var(--head);border-bottom:1.5px solid var(--rule)}
+.tl-hd div{text-align:center;font-size:14px;font-weight:800;color:var(--ink);padding:8px 4px}
+.tl-hd .mid,.col.mid{border-right:1.5px solid var(--rule)}
+.tl-body{display:grid;grid-template-columns:86px 1fr 1fr;background:repeating-linear-gradient(45deg,#FAFAFA 0 6px,#F2F2F2 6px 7px)}
+.col{position:relative}
+.c-ax{border-right:1px solid var(--rule2)}
+.blk{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#fff;border-top:1px solid var(--rule2);border-bottom:1px solid var(--rule2);padding:2px 6px;overflow:hidden}
+.blk.ax{background:#F7F7F7}
+.blk.ax b{font-size:14px;color:var(--ink)}
+.blk.ax span{font-size:11px;color:var(--muted)}
+.blk.ax.on{background:var(--ink)}
+.blk.ax.on b,.blk.ax.on span{color:#fff}
+.blk.lunch{background:#ECECEC;color:var(--muted);font-size:12px}
+.blk.now{background:var(--hl)}
+.blk.now .cs{font-size:16px;font-weight:800;color:var(--blue)}
+.blk.now .cr{font-size:14.5px;font-weight:800;color:var(--blue)}
+.blk.exam{left:6px;right:6px;background:#FFEBEE;border:2px solid #C62828;border-radius:4px;z-index:2;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.blk.exam.half{left:50%}
+.ex-t{font-size:13px;font-weight:800;color:#C62828}
+.ex-r{font-size:17px;font-weight:800;color:#B71C1C;margin:2px 0}
+.ex-i{font-size:12.5px;font-weight:700;color:var(--ink)}
+.doc-legend i.r{background:#FFEBEE;border-color:#C62828;margin-left:12px}
+.exam-box{border:2px solid #B71C1C;margin:0 0 12px;padding:9px 14px;background:#FFF5F5}
+.exam-box .sum-t{color:#B71C1C}
+.ex-sub{font-weight:500;color:var(--muted);margin-left:6px;font-size:12px}
+.ex-tt{width:100%;border-collapse:collapse;font-size:15px}
+.ex-tt th{font-size:12px;color:var(--muted);font-weight:700;text-align:left;padding:2px 6px 4px;border-bottom:1px solid #E3B4B4}
+.ex-tt td{padding:5px 6px;border-bottom:1px solid #F1D6D6;color:var(--ink)}
+.ex-tt tr:last-child td{border-bottom:none}
+.ex-n{font-weight:800;width:30%}
+.ex-r{font-weight:800;color:#B71C1C}
+.ex-e{font-weight:800}
+.doc-notes{margin-top:12px;font-size:13.5px;line-height:1.75;color:var(--text)}
+.doc-notes div::before{content:'※ ';font-weight:700}
+.doc-legend{margin-top:6px;font-size:12.5px;color:var(--muted)}
+.doc-legend i{display:inline-block;width:22px;height:11px;background:var(--hl);border:1px solid var(--rule2);vertical-align:-1px;margin-right:4px}
+.doc-foot{margin-top:18px;text-align:right;font-size:14px;font-weight:700;color:var(--ink)}
+
+/* ── 메신저 문구 (?admin 일 때만) ── */
+.msg{max-width:820px;margin:12px auto 0;background:#fff;border:1px dashed #999;padding:12px 16px}
+.msg-hd{display:flex;align-items:center;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.msg-hd .btn-p{margin-left:auto;font-size:12px;padding:4px 10px}
+.msg-body{font-size:14px;line-height:1.7;white-space:pre-wrap}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:3px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}
+.toast.show{opacity:1}
+
+#printArea{display:none}
+
+/* ── 모바일 ── */
+@media(max-width:680px){
+  body{flex-direction:column}
+  .main{order:1;flex:1;min-height:0}
+  .sb{order:2;width:100%;min-width:0;height:48px;flex-direction:row;border-right:none;border-top:1px solid #CFCFCF}
+  .sb-hd,.sb-srch,.sb-filter,.grp{display:none}
+  .sb-list{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;align-items:center;width:100%;padding:0 6px;gap:4px}
+  .ti{white-space:nowrap;border:1px solid #CCC;border-radius:3px;padding:4px 10px;font-size:13px;flex-shrink:0}
+  .ti .bd{display:none}
+  .top-sub,.btns .btn-p:not(.solid){display:none!important}
+  .content{padding:8px}
+  .paper{padding:16px 12px}
+  .doc-title{font-size:17px}
+  .doc-meta .who{font-size:15px}
+  .tt th.h-p{width:42px}
+  .slot{height:52px;padding:2px 4px}
+  .cs{font-size:13px}
+  .cr{font-size:12px}
+}
+
+/* ════════════════════════════════
+   인쇄: A4 세로, 한 장에 한 명
+   ════════════════════════════════ */
+@media print{
+  @page{size:A4 portrait;margin:15mm 14mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{height:auto!important;overflow:visible!important;display:block!important;background:#fff!important}
+  .sb,.main,.toast{display:none!important}
+  #printArea{display:block!important}
+  .pp{break-after:page;page-break-after:always}
+  .pp:last-child{break-after:auto;page-break-after:auto}
+  .pp .paper{box-shadow:none;max-width:none;padding:0}
+  .pp .doc-title{font-size:24px;margin-top:4px}
+  .pp .doc-meta{margin:22px 0 8px}
+  .pp .doc-meta .who{font-size:19px}
+  .pp .doc-meta .when{font-size:15px}
+  .pp .tt thead th{font-size:14.5px;padding:9px 4px}
+  .pp .tt th.h-p{width:20mm}
+  .pp .slot{height:19mm}
+  .pp .sum{margin-bottom:14px}
+  .pp .tl{--k:1.32}
+  .pp .tl-hd div{font-size:14.5px}
+  .pp .blk .cs{font-size:15px}
+  .pp .blk.now .cs{font-size:17px}
+  .pp .ex-r{font-size:18px}
+  .pp .ex-tt{font-size:15.5px}
+  .pp .sum-row{font-size:15.5px}
+  .pp .slot.now .cs{font-size:17px}
+  .pp .slot.now .cr{font-size:15px}
+  .pp .cs{font-size:15px}
+  .pp .cr{font-size:13.5px}
+  .pp .doc-notes{font-size:14px;margin-top:14px}
+  .pp .doc-legend{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="sb">
+  <div class="sb-hd">
+    <div class="sb-title">교사 목록</div>
+    <div class="sb-cnt" id="sbCnt"></div>
+  </div>
+  <div class="sb-srch"><input id="srch" type="text" placeholder="이름 검색" oninput="renderList()"></div>
+  <div class="sb-filter">
+    <button class="btn-sort on" id="btnSort" onclick="toggleOnly()">변경된 선생님만</button>
+  </div>
+  <div class="sb-list" id="sbList"></div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="top-sub" id="topSub"></div>
+    <div class="btns">
+      <a class="btn-p" href="https://docs.google.com/spreadsheets/d/1pxx_kiTWDcA9Y3VM4BfeLsWx1ZuSlgPewVXVVkK_-j4/edit?gid=979638191#gid=979638191" target="_blank">시트 열기</a>
+      <button class="btn-p admin-only" onclick="copyAllMsgs()">전체 문구 복사</button>
+      <button class="btn-p" onclick="printChanged()">변경된 선생님 전체 인쇄</button>
+      <button class="btn-p solid" onclick="printCurrent()">이 선생님 인쇄</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  기본 설정 (바꿀 때는 여기만 수정)
+// ══════════════════════════════════════════════════════════════
+const TITLE      = '수능대비 파이널 모의고사';
+const DATE_LABEL = '11월 16일 월요일';   // 화면과 인쇄에 표시
+const DATE_SHORT = '11월 16일(월)';      // 메신저 문구에 사용
+
+// 주소 끝에 ?admin 을 붙여 열면 메신저 문구가 보입니다 (예: 1116.html?admin)
+const ADMIN = new URLSearchParams(location.search).has('admin');
+if(ADMIN) document.documentElement.classList.add('admin');
+
+// 모의고사 시험 시간 (수능 시간표와 같음)
+//  enter: 감독 교사 입실 시각. 비워 두면('') 표시하지 않습니다.
+//  enter: 감독 입실 (예비령 시각), start~end: 시험 시간
+const EXAM = {
+  1: {subj:'국어',       enter:'08:10', start:'08:40', end:'10:00'},
+  2: {subj:'수학',       enter:'10:20', start:'10:30', end:'12:10'},
+  3: {subj:'영어',       enter:'13:00', start:'13:10', end:'14:20'},
+  4: {subj:'한국사/탐구', enter:'14:40', start:'14:50', end:'16:37'},
+};
+
+// 우리 학교 교시 시간
+const PERIOD_TIME = {
+  1:['08:40','09:30'], 2:['09:40','10:30'], 3:['10:40','11:30'], 4:['11:40','12:30'],
+  5:['13:30','14:20'], 6:['14:30','15:20'], 7:['15:30','16:20'],
+};
+const LUNCH = ['12:30','13:30'];
+
+// 모든 교사 화면과 인쇄본에 공통으로 나오는 안내사항
+const NOTES_GLOBAL = [
+  '11월 16일(월) 하루만 적용되는 시간표입니다.',
+  '9, 10, 11반은 4층 대강의실에 모여 함께 자습합니다.'
+];
+
+// 교사별 추가 안내 (필요할 때만)
+const NOTES_EACH = {
+  // '홍길동': '추가 안내사항',
+};
+
+// ══════════════════════════════════════════════════════════════
+//  시간표 데이터 ('파이널 모의고사' 시트에서 옮김)
+//  형식: [이름, 감독여부(1/0), '변경 전 1~7교시', '변경 후 1~7교시']
+//  교시 구분은 |, 칸 안의 줄바꿈은 /, 변경 후가 '=' 이면 변경 없음
+// ══════════════════════════════════════════════════════════════
+const RAW = [
+['김양경',1,'||생활과윤리/304|생활과윤리/310|3학년 창체/310||생활과윤리/311','10반 모의고사 1교시(국어)|10반 모의고사 1교시(국어)|||||'],
+['김영강',1,'독서A/304|독서A/306|||독서A/305|독서A/310|','1교시 모의고사 부감독||||10반 모의고사 3교시(영어)||4교시 모의고사 부감독'],
+['김형식',1,'확률과통계/309|확률과통계/308|||확률과통계/301||미적분/301','||||11반 모의고사 3교시(영어)||'],
+['이상찬',1,'|과학탐구실험2/105||화학Ⅱ/301|과학탐구실험2/104||화학Ⅱ/306','|과학탐구실험2/105|||과학탐구실험2/104|10반 모의고사 4교시(탐구)|10반 모의고사 4교시(탐구)'],
+['전하진',1,'독서A/311|독서A/301|||독서B/308|독서A/307|','11반 모의고사 1교시(국어)|11반 모의고사 1교시(국어)|||||'],
+['조병수',1,'|||정보/110|||','|||정보/110||11반 모의고사 4교시(탐구)|11반 모의고사 4교시(탐구)'],
+['최경선',1,'확률과통계/306||미적분/307|미적분/306|||','||10반 모의고사 2교시(수학)|10반 모의고사 2교시(수학)|||'],
+['피우리',1,'영어독해와작문A/302|영어독해와작문B/304|||영어독해와작문A/306|영어독해와작문A/311|','||11반 모의고사 2교시(수학)|11반 모의고사 2교시(수학)|||'],
+['강선명',0,'스포츠생활/303|스포츠생활/307|||스포츠생활/304|환경/302|','스포츠생활/3+4|스포츠생활/307|||스포츠생활/304|환경/302|'],
+['강인경',0,'한국사2/109|||한국사2/107|한국사2/108||세계사/309','한국사2/109|||한국사2/107|한국사2/108||세계사/4층 대강의실/(9+10+11)'],
+['고경남',1,'||사회문화/305|사회문화/308|||사회문화/303','1교시 모의고사 부감독||사회문화/305|사회문화/7+8|||4교시 모의고사 부감독'],
+['고광준',0,'환경/307||미적분Ⅰ/206||공통수학2/109|환경/309|','환경/307||미적분Ⅰ/206||공통수학2/109|환경/4층 대강의실/(9+10+11)|'],
+['권문희',0,'공통국어2A/108||공통국어2A/103||공통국어2A/102|공통국어2A/104|','='],
+['김기현',0,'|역학과에너지/207|||역학과에너지/208||','='],
+['김도원',0,'영어독해와작문A/204||영어독해와작문A/205|영어독해와작문A/203|||영어독해와작문A/211','='],
+['김동윤',0,'|도시의미래탐구/210||여행지리/309|도시의미래탐구/209||','|도시의미래탐구/210||여행지리/4층 대강의실/(9+10+11)|도시의미래탐구/209||'],
+['김미정',0,'공통수학2/102|공통수학2/103|||공통수학2/101||','='],
+['김봉기',0,'|공통영어2A/110||공통영어2A/105||공통영어2A/111|','='],
+['김수인',0,'영어ⅡA/207||영어ⅡA/208|영어ⅡC/206|||영어ⅡC/204','='],
+['김영숙',0,'|한국사2/104||한국사2/103||한국사2/101|한국사2/102','='],
+['김용훈',0,'한문/209||한문Ⅱ/301|한문/211|||한문/208','='],
+['김인호',0,'|동아시아사/204|한국사2/111||동아시아사/201||한국사2/110','='],
+['김태연',0,'기술가정/103|기술가정/101|||기술가정/105||기술가정/104','='],
+['김현진',0,'|통합사회2/107||사회문화/304||정치/211|','='],
+['원인정',0,'||화법과작문/308|화법과작문/311||독서B/305|화법과작문/310','||화법과작문/308|화법과작문/1(+)||독서B/305|화법과작문/1(+)'],
+['노명진',0,'|윤리와사상/202||생활과윤리/305|윤리와사상/204|윤리와사상/201|','='],
+['모현정',0,'||영어독해와작문A/210|영어독해와작문A/209|||','='],
+['문미솔',0,'|지구과학Ⅰ/211|통합과학2C/106||지구과학Ⅰ/207|지구과학Ⅰ/209|','='],
+['문한준',0,'통합과학2A/110|통합과학2A/111||통합과학2A/109|||생명과학Ⅱ/304','통합과학2A/110|통합과학2A/111||통합과학2A/109|||생명과학Ⅱ/3+4'],
+['문희란',0,'통합과학2C/104||통합과학2B/102||통합과학2B/107|세포와물질대사/205|','='],
+['박상민',0,'공통수학2/105|||공통수학2/106|||공통수학2/108','='],
+['박상은',0,'|체육2/108||미술창작/202|체육2/110||스포츠생활1/210','='],
+['박항수',0,'|세포와물질대사/205|||세포와물질대사/202|세포와물질대사/207|','='],
+['백가영',0,'공통수학2/111||공통수학2/110||기하/210|기하/208|','='],
+['복정호',0,'영어ⅡB/202||영어ⅡB/209|영어ⅡB/207|||영어ⅡB/205','='],
+['손의윤',0,'||음악과미디어/105||음악과미디어/111|음악연주/308|','||음악과미디어/105||음악과미디어/111|음악연주/7+8|'],
+['신동빈',0,'|공통국어2A/109||공통국어2B/101||공통국어2A/110|','='],
+['유인수',0,'|도시의미래탐구/201|여행지리/311|||도시의미래탐구/206|','|도시의미래탐구/201|여행지리/7(+)|||도시의미래탐구/206|'],
+['유지선',0,'가정과학/310|가정과학/303|||가정과학/309|3학년 창체/304|','가정과학/4층 대강의실/(9+10+11)|가정과학/303|||가정과학/1(+)|3학년 창체/304|'],
+['윤장한',0,'||고전과윤리/303|통합사회2/111|||고전과윤리/308','='],
+['이강종',0,'영어독해와작문A/305|영어독해와작문A/309|||영어독해와작문A/307|영어독해와작문A/301|','영어독해와작문A/8(+)|영어독해와작문A/4층 대강의실/(9+10+11)|||영어독해와작문A/7+8|영어독해와작문A/301|'],
+['이광우',0,'미술창작/208||체육2/101|||체육2/105|체육2/103','='],
+['이두현',0,'||여행지리/310|여행지리/307|도시의미래탐구/211||여행지리/305','||여행지리/4층 대강의실/(9+10+11)|여행지리/6(+)|도시의미래탐구/211||여행지리/305'],
+['이보민',0,'공통영어2A/101||공통영어2A/104||공통영어2A/103|공통영어2A/102|','='],
+['이서현',0,'||과학탐구실험2/108|지구과학Ⅰ/302||과학탐구실험2/109|지구과학Ⅰ/307','||과학탐구실험2/108|지구과학Ⅰ/302||과학탐구실험2/109|지구과학Ⅰ/6+7'],
+['이소망',0,'중국어/206||중국어/203|||환경/306|중국어/207','='],
+['이연희',0,'||정보/109|||정보/107|정보/111','='],
+['이예은',0,'음악감상과비평/211|||음악감상과비평/210|음악연주/311||음악감상과비평/206','음악감상과비평/211|||음악감상과비평/210|음악연주/4층 대강의실/(9+10+11)||음악감상과비평/206'],
+['이원표',0,'|교육의이해/206|||교육의이해/203|교육의이해/202|','='],
+['이정은',0,'|||진로/102||진로/108|진로/106','='],
+['이정현',0,'|세포와물질대사/208|생명과학Ⅱ/302||세포와물질대사/206|세포와물질대사/204|','='],
+['이주희',0,'종교학/308||중국어/201|||종교학/303|중국어/202','종교학/5+6||중국어/201|||종교학/303|중국어/202'],
+['이현구',0,'미적분Ⅰ/201||미적분Ⅰ/211||확률과통계/302||미적분Ⅰ/209','미적분Ⅰ/201||미적분Ⅰ/211||확률과통계/2+3||미적분Ⅰ/209'],
+['이현애',0,'|미술창작/302||미술창작/201|미술창작/303||','|미술창작/8(+)||미술창작/201|미술창작/5+6||'],
+['이효원',0,'|확률과통계/305|기하/306||||','|확률과통계/5+6|기하/306||||'],
+['임정화',0,'|정치/209|사회문화/309||정치/205|정치/203|','|정치/209|사회문화/4(+)||정치/205|정치/203|'],
+['장미',0,'공통영어2A/107|||공통영어2A/108|공통영어2A/106||공통영어2A/109','='],
+['장성란',0,'영어독해와작문B/210||영어독해와작문B/202|||통합사회2/106|영어독해와작문B/201','='],
+['장연수',0,'스포츠생활1/205||스포츠생활1/207|스포츠생활1/204|||스포츠생활1/203','='],
+['정다경',0,'환경/301|환경/310||일본어회화Ⅰ/303|||일본어회화Ⅰ/302','환경/1+2|환경/4(+)||일본어회화Ⅰ/303|||일본어회화Ⅰ/302'],
+['정명은',0,'|윤리와사상/203||||윤리와사상/210|','='],
+['정영주',0,'|통합사회2/102||통합사회2/104|||통합사회2/101','='],
+['정춘경',0,'공통국어2B/106||공통국어2B/107||||공통국어2B/105','='],
+['최수빈',0,'미적분Ⅰ/203||미적분Ⅰ/204|미적분Ⅰ/208|||','='],
+['최지혜',0,'|음악과미디어/106||음악감상과비평/205||음악과미디어/103|음악과미디어/107','='],
+['한경애',0,'|3학년 창체/311|||||','|3학년 창체/1+2|||||'],
+];
+
+// ══════════════════════════════════════════════════════════════
+//  데이터 변환
+// ══════════════════════════════════════════════════════════════
+const MAX_P = 7;
+
+function splitDay(str){
+  const arr = str.split('|');
+  while(arr.length < MAX_P) arr.push('');
+  return arr.slice(0, MAX_P).map(v => v.trim());
+}
+
+// 칸 하나를 {type, s(과목), r(줄 배열), raw} 로 변환
+function parseCell(raw){
+  if(!raw) return null;
+  if(raw.includes('모의고사')){
+    if(raw.includes('부감독')){
+      const n = (raw.match(/(\d)교시/) || [])[1];
+      return {type:'exam', no:+n, role:'부감독', s:'모의고사 부감독', r:[raw.replace('모의고사 부감독','').trim() + ' 시험'], raw};
+    }
+    const m = raw.match(/^(\d+반)\s*모의고사\s*(.+)$/);
+    if(m){
+      const n = (m[2].match(/(\d)교시/) || [])[1];
+      return {type:'exam', no:+n, role:m[1] + ' 감독', s:m[1] + ' 모의고사 감독', r:[m[2]], raw};
+    }
+    return {type:'exam', s:raw, r:[], raw};
+  }
+  const parts = raw.split('/');
+  const s = parts[0];
+  const room = parts.slice(1).join(' ');
+  if(room.includes('대강의실')){
+    return {type:'duty', s, r:['4층 대강의실', '9+10+11반'], raw};
+  }
+  let m = room.match(/^(\d+)\(\+\)$/);
+  if(m) return {type:'plus', s, r:['3학년 ' + m[1] + '반'], raw};
+  if(/^\d+(\+\d+)+$/.test(room)){
+    const cls = room.split('+').map(n => n + '반').join('+');
+    return {type:'plus', s, r:['3학년 ' + cls], raw};
+  }
+  return {type:'normal', s, r:[room], raw};
+}
+
+const DB = {teachers:[], sup:{}, before:{}, after:{}, diffs:{}, show:{}, exams:{}};
+RAW.forEach(([name, sup, b, a]) => {
+  const bArr = splitDay(b);
+  const aArr = (a === '=') ? bArr.slice() : splitDay(a);
+  DB.teachers.push(name);
+  DB.sup[name] = !!sup;
+  DB.before[name] = bArr.map(parseCell);
+  DB.after[name]  = aArr.map(parseCell);
+  DB.diffs[name]  = bArr.map((v, i) => v !== aArr[i] ? i + 1 : 0).filter(Boolean);
+  DB.show[name]   = DB.diffs[name].filter(p => { const c = DB.after[name][p-1]; return c && c.type !== 'exam'; });
+  const ex = {};
+  DB.after[name].forEach(c => { if(c && c.type === 'exam') ex[c.no + c.role] = {no:c.no, role:c.role}; });
+  DB.exams[name]  = Object.values(ex).sort((a,b) => a.no - b.no);
+});
+
+// ══════════════════════════════════════════════════════════════
+//  메신저 문구
+// ══════════════════════════════════════════════════════════════
+function msgBefore(c){
+  if(!c) return '(원래 수업 없음)';
+  return c.s + '(' + c.r.join(' ') + ')';
+}
+function msgAfter(c){
+  if(!c) return '수업 없음';
+  if(c.type === 'exam'){
+    if(c.s === '모의고사 부감독') return c.r[0].replace(' 시험','') + ' 모의고사 부감독';
+    return c.s.replace(' 감독','') + ' ' + c.r[0] + ' 감독';
+  }
+  if(c.type === 'duty') return c.s + '(4층 대강의실, 9+10+11반 합반)';
+  if(c.type === 'plus'){
+    const t = c.r[0];
+    return c.s + '(' + t + (t.includes('+') ? ' 합반' : '') + ')';
+  }
+  return c.s + '(' + c.r.join(' ') + ')';
+}
+function examLine(e){
+  const x = EXAM[e.no] || {};
+  return e.no + '교시 ' + (x.subj || '') + ' ' + e.role
+    + (e.role === '부감독' ? '' : ', 입실 ' + x.enter + ' (시험 ' + x.start + '~' + x.end + ')');
+}
+function buildMsg(name){
+  const diffs = DB.show[name];
+  const exams = DB.exams[name];
+  if(!diffs.length && !exams.length) return name + ' 선생님은 ' + DATE_SHORT + ' 시간표 변경이 없습니다.';
+  const exLines = exams.length ? '[모의고사 감독]\n' + exams.map(examLine).join('\n') + '\n\n' : '';
+  const lines = diffs.map(p =>
+    p + '교시: ' + (DB.before[name][p-1] ? msgBefore(DB.before[name][p-1]) + ' → ' : '') + msgAfter(DB.after[name][p-1])
+  );
+  return '[' + DATE_SHORT + ' 시간표 변경 안내]\n'
+    + name + ' 선생님, ' + TITLE + '로 ' + DATE_SHORT + ' 하루만 시간표가 아래와 같이 변경됩니다.\n\n'
+    + exLines
+    + (lines.length ? '[바뀐 수업]\n' + lines.join('\n') + '\n\n' : '')
+    + '나머지 교시는 원래 시간표대로입니다. 감사합니다.';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  목록
+// ══════════════════════════════════════════════════════════════
+let cur = null;
+let onlyChanged = true;
+document.getElementById('topSub').textContent = TITLE + ' 시간표 변경 안내 (' + DATE_LABEL + ')';
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function rank(name){
+  if(DB.sup[name]) return 2;
+  return DB.diffs[name].length ? 1 : 0;
+}
+function toggleOnly(){
+  onlyChanged = !onlyChanged;
+  const btn = document.getElementById('btnSort');
+  btn.className = 'btn-sort' + (onlyChanged ? ' on' : '');
+  btn.textContent = onlyChanged ? '변경된 선생님만' : '전체 선생님';
+  renderList();
+}
+function renderList(){
+  const q = document.getElementById('srch').value.trim();
+  const list = DB.teachers.filter(t => t.includes(q) && (!onlyChanged || rank(t) > 0));
+  const chgCnt = DB.teachers.filter(t => rank(t) > 0).length;
+  document.getElementById('sbCnt').textContent = '변경 ' + chgCnt + '명 / 전체 ' + DB.teachers.length + '명';
+  const groups = [[2,'모의고사 감독'],[1,'시간표 변경'],[0,'변경 없음']];
+  document.getElementById('sbList').innerHTML = groups.map(([r, label]) => {
+    const g = list.filter(t => rank(t) === r);
+    if(!g.length) return '';
+    return `<div class="grp">${label} (${g.length})</div>` + g.map(t =>
+      `<div class="ti${t===cur?' on':''}${r?'':' dim'}" onclick="select('${t}')">${esc(t)}${DB.sup[t] ? '<span class="bd sup">감독</span>' : DB.diffs[t].length ? '<span class="bd chg">변경</span>' : ''}</div>`
+    ).join('');
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  안내문 (화면과 인쇄가 같은 모양)
+// ══════════════════════════════════════════════════════════════
+function cellHtml(c, isDiff, side, extra){
+  const cls = 'slot' + (isDiff && side === 'a' ? ' now' : '') + (extra ? ' ' + extra : '');
+  if(!c){
+    return `<td class="${cls}"><span class="empty">-</span></td>`;
+  }
+  return `<td class="${cls}">
+      <span class="cs">${esc(c.s)}</span>
+      ${c.r.filter(Boolean).map(x => `<span class="cr">${esc(x)}</span>`).join('')}
+    </td>`;
+}
+
+function notesFor(name){
+  const extra = NOTES_EACH[name] ? [].concat(NOTES_EACH[name]) : [];
+  return [...NOTES_GLOBAL.filter(Boolean), ...extra];
+}
+
+function sumTxt(c, none){
+  if(!c) return none;
+  return c.s + ' ' + c.r.filter(Boolean).join(' ');
+}
+
+// ── 시간 계산 ──
+function toMin(t){ const [h,m] = t.split(':').map(Number); return h*60 + m; }
+function overlap(a1,a2,b1,b2){ return a1 < b2 && b1 < a2; }
+
+function cellBlock(c, cls, top, h, extraStyle){
+  const style = `top:calc(var(--k)*${top}px);height:calc(var(--k)*${h}px);${extraStyle||''}`;
+  if(!c) return `<div class="blk ${cls}" style="${style}"><span class="empty">-</span></div>`;
+  return `<div class="blk ${cls}" style="${style}">
+      <span class="cs">${esc(c.s)}</span>
+      ${c.r.filter(Boolean).map(x => `<span class="cr">${esc(x)}</span>`).join('')}
+    </div>`;
+}
+
+// 감독이 아닌 선생님: 교시별 표
+function buildTable(name, diffs){
+  let rows = '';
+  for(let p = 1; p <= MAX_P; p++){
+    const isDiff = diffs.includes(p);
+    rows += `<tr>
+      <td class="pd${isDiff?' on':''}">${p}교시</td>
+      ${cellHtml(DB.before[name][p-1], isDiff, 'b', 'mid')}
+      ${cellHtml(DB.after[name][p-1], isDiff, 'a')}
+    </tr>`;
+  }
+  return `<table class="tt">
+      <thead><tr>
+        <th class="h-p">교시</th>
+        <th class="mid">원래 시간표</th>
+        <th>변경된 시간표</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function buildDoc(name){
+  const diffs = DB.show[name];
+  const exams = DB.exams[name];
+
+  // 그릴 시간 범위 (감독 입실이 더 이르면 그만큼 위로 늘림)
+  let T0 = toMin(PERIOD_TIME[1][0]), T1 = toMin(PERIOD_TIME[MAX_P][1]);
+  exams.forEach(e => { const x = EXAM[e.no]; T0 = Math.min(T0, toMin(x.enter)); T1 = Math.max(T1, toMin(x.end)); });
+  T0 -= 5; T1 += 5;
+  const H = T1 - T0;
+
+  // 감독 블록과 겹치는 수업이 있으면 칸을 반으로 나눔
+  const exBlocks = exams.map(e => {
+    const x = EXAM[e.no];
+    const a = toMin(x.enter), b = toMin(x.end);
+    let clash = false;
+    for(let p = 1; p <= MAX_P; p++){
+      const c = DB.after[name][p-1];
+      if(c && c.type !== 'exam' && overlap(a, b, toMin(PERIOD_TIME[p][0]), toMin(PERIOD_TIME[p][1]))) clash = true;
+    }
+    return {e, x, a, b, clash};
+  });
+
+  let axis = '', colB = '', colA = '';
+  for(let p = 1; p <= MAX_P; p++){
+    const s = toMin(PERIOD_TIME[p][0]), en = toMin(PERIOD_TIME[p][1]);
+    const top = s - T0, h = en - s;
+    const isDiff = diffs.includes(p);
+    axis += `<div class="blk ax${isDiff?' on':''}" style="top:calc(var(--k)*${top}px);height:calc(var(--k)*${h}px)">
+        <b>${p}교시</b><span>${PERIOD_TIME[p][0]}~${PERIOD_TIME[p][1]}</span></div>`;
+    colB += cellBlock(DB.before[name][p-1], 'old', top, h);
+    const ac = DB.after[name][p-1];
+    const show = (ac && ac.type === 'exam') ? null : ac;
+    const half = show && exBlocks.some(x => x.clash && overlap(x.a, x.b, s, en));
+    colA += cellBlock(show, isDiff ? 'now' : '', top, h, half ? 'right:50%;' : '');
+  }
+  // 점심
+  const ls = toMin(LUNCH[0]) - T0, lh = toMin(LUNCH[1]) - toMin(LUNCH[0]);
+  const lunch = (txt) => `<div class="blk lunch" style="top:calc(var(--k)*${ls}px);height:calc(var(--k)*${lh}px)">${txt}</div>`;
+  axis += `<div class="blk ax lunch" style="top:calc(var(--k)*${ls}px);height:calc(var(--k)*${lh}px)"><b>점심</b><span>${LUNCH[0]}~${LUNCH[1]}</span></div>`;
+  colB += lunch('');
+  colA += lunch('');
+
+  // 감독 블록
+  colA += exBlocks.map(({e, x, a, b, clash}) => `
+    <div class="blk exam${clash?' half':''}" style="top:calc(var(--k)*${a - T0}px);height:calc(var(--k)*${b - a}px)">
+      <span class="ex-t">모의고사 ${e.no}교시 ${esc(x.subj)}</span>
+      <span class="ex-r">${esc(e.role)}</span>
+      ${e.role === '부감독' ? '' : `<span class="ex-i">입실 ${x.enter} / 시험 ${x.start}~${x.end}</span>`}
+    </div>`).join('');
+
+  const notes = notesFor(name);
+  const cnt = [exams.length ? '모의고사 감독 ' + exams.length + '회' : '', diffs.length ? '수업 변경 ' + diffs.length + '개' : ''].filter(Boolean).join(', ') || '변경 없음';
+  return `<div class="paper">
+    <div class="doc-title">${esc(TITLE)} 시간표 변경 안내</div>
+    <div class="doc-meta">
+      <div><span class="who">${esc(name)} 선생님</span><span class="cnt">${cnt}</span></div>
+      <div class="when">일시: ${esc(DATE_LABEL)}</div>
+    </div>
+    ${diffs.length ? `<div class="sum"><div class="sum-t">바뀐 수업</div>${diffs.map(p => `<div class="sum-row"><span class="sum-p">${p}교시</span>${DB.before[name][p-1] ? `<span class="sum-b">${esc(sumTxt(DB.before[name][p-1]))}</span><span class="sum-x">→</span>` : ''}<span class="sum-a">${esc(sumTxt(DB.after[name][p-1]))}</span></div>`).join('')}</div>` : ''}
+    ${!exams.length ? buildTable(name, diffs) : `<div class="tl">
+      <div class="tl-hd"><div>교시</div><div class="mid">원래 시간표</div><div>변경된 시간표</div></div>
+      <div class="tl-body" style="height:calc(var(--k)*${H}px)">
+        <div class="col c-ax">${axis}</div>
+        <div class="col c-b mid">${colB}</div>
+        <div class="col c-a">${colA}</div>
+      </div>
+    </div>`}
+    <div class="doc-legend"><i></i>노란 칸: 바뀐 수업${exams.length ? ' <i class="r"></i>빨간 칸: 모의고사 감독 (수능 시간표 기준)' : ''}</div>
+    ${notes.length ? `<div class="doc-notes">${notes.map(n => `<div>${esc(n)}</div>`).join('')}</div>` : ''}
+  </div>`;
+}
+
+function select(name){
+  cur = name;
+  renderList();
+  document.getElementById('content').innerHTML = buildDoc(name) + (ADMIN ? `
+    <div class="msg">
+      <div class="msg-hd">메신저 안내 문구 (관리자만 보임)
+        <button class="btn-p solid" onclick="copyMsg()">복사하기</button>
+      </div>
+      <div class="msg-body">${esc(buildMsg(name))}</div>
+    </div>` : '');
+  document.getElementById('content').scrollTop = 0;
+}
+
+// ── 복사 ──
+function showToast(t){
+  const el = document.getElementById('toast');
+  el.textContent = t;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+}
+async function copyMsg(){
+  if(!cur) return;
+  await copyText(buildMsg(cur));
+  showToast(cur + ' 선생님 문구를 복사했습니다');
+}
+async function copyAllMsgs(){
+  const list = DB.teachers.filter(t => DB.diffs[t].length);
+  const text = list.map(buildMsg).join('\n\n────────────────\n\n');
+  await copyText(text);
+  showToast('변경된 ' + list.length + '명 문구를 모두 복사했습니다');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  인쇄 (A4 세로, 한 장에 한 명)
+// ══════════════════════════════════════════════════════════════
+function buildPrintPage(name){ return `<div class="pp">${buildDoc(name)}</div>`; }
+function doPrint(names){
+  document.getElementById('printArea').innerHTML = names.map(buildPrintPage).join('');
+  setTimeout(() => window.print(), 50);
+}
+function printCurrent(){
+  if(!cur){ showToast('선생님을 먼저 선택하세요'); return; }
+  doPrint([cur]);
+}
+function printChanged(){
+  const list = DB.teachers.filter(t => DB.diffs[t].length).sort((a,b) => rank(b) - rank(a));
+  doPrint(list);
+}
+
+// ── 시작 ──
+renderList();
+select(DB.teachers.find(t => rank(t) > 0));
+</script>
+</body>
+</html>
