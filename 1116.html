@@ -632,11 +632,12 @@ function buildDoc(name){
 
 function select(name){
   cur = name;
+  step = 1; stepImg = null; stepName = null;
   renderList();
   document.getElementById('content').innerHTML = buildDoc(name) + (ADMIN ? `
     <div class="msg">
       <div class="msg-hd">메신저 안내 문구 (관리자만 보임)
-        <button class="btn-p solid" onclick="copyBoth()" style="margin-left:auto">문구+이미지 복사</button>
+        <button class="btn-p solid" id="btnStep" onclick="copyStep()" style="margin-left:auto">① 문구 복사</button>
         <button class="btn-p" onclick="copyMsg()" style="margin-left:6px">문구만</button>
         <button class="btn-p" onclick="copyImage()" style="margin-left:6px">이미지만</button>
       </div>
@@ -712,30 +713,33 @@ async function copyImage(){
     }
   }
 }
-// 문구와 이미지를 한 번에: 메신저가 HTML 붙여넣기를 지원하면 글과 그림이 같이 들어갑니다
-async function copyBoth(){
+// 한 버튼으로 차례대로: ① 문구 복사 → (붙여넣기) → ② 이미지 복사 → (붙여넣기)
+let step = 1, stepImg = null, stepName = null;
+function resetStep(){
+  step = 1; stepImg = null; stepName = null;
+  const b = document.getElementById('btnStep');
+  if(b) b.textContent = '① 문구 복사';
+}
+async function copyStep(){
   if(!cur) return;
-  showToast('문구와 이미지를 만드는 중...');
-  const text = buildMsg(cur);
-  const pngPromise = renderImage(cur).then(canvasBlob);
-  const htmlPromise = pngPromise.then(b => new Promise(r => {
-    const fr = new FileReader();
-    fr.onload = () => r(new Blob([
-      '<div>' + esc(text).replace(/\n/g, '<br>') + '</div><br><img src="' + fr.result + '" style="max-width:100%">'
-    ], {type:'text/html'}));
-    fr.readAsDataURL(b);
-  }));
-  try{
-    window.focus();
-    await navigator.clipboard.write([new ClipboardItem({
-      'text/plain': new Blob([text], {type:'text/plain'}),
-      'text/html': htmlPromise,
-      'image/png': pngPromise,
-    })]);
-    showToast('문구와 이미지를 복사했습니다. 메신저에서 Ctrl+V 하세요');
-  }catch(e){
-    console.error(e);
-    showToast('함께 복사가 안 됩니다. [문구만] → [이미지만] 순서로 써 주세요');
+  const b = document.getElementById('btnStep');
+  if(step === 1 || stepName !== cur){
+    await copyText(buildMsg(cur));
+    step = 2; stepName = cur;
+    stepImg = renderImage(cur).then(canvasBlob);   // 미리 이미지 만들어 두기
+    b.textContent = '② 이미지 복사';
+    showToast('① 문구를 복사했습니다. 붙여넣기 후 [② 이미지 복사]를 누르세요');
+  } else {
+    try{
+      window.focus();
+      await navigator.clipboard.write([new ClipboardItem({'image/png': stepImg})]);
+      showToast('② 이미지를 복사했습니다. 붙여넣기 하세요');
+    }catch(e){
+      console.error(e);
+      showToast('이미지 복사가 막혔습니다. 다시 눌러 주세요');
+      return;
+    }
+    resetStep();
   }
 }
 
