@@ -128,13 +128,21 @@ body{
 .doc-legend i{display:inline-block;width:22px;height:11px;background:var(--hl);border:1px solid var(--rule2);vertical-align:-1px;margin-right:4px}
 .doc-foot{margin-top:18px;text-align:right;font-size:14px;font-weight:700;color:var(--ink)}
 
-/* ── 메신저 문구 (?admin 일 때만) ── */
+/* ── 메신저 문구 (관리자 모드일 때만) ── */
 .msg{max-width:820px;margin:12px auto 0;background:#fff;border:1px dashed #999;padding:12px 16px}
 .msg-hd{display:flex;align-items:center;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
 .msg-hd .btn-p{margin-left:auto;font-size:12px;padding:4px 10px}
 .msg-body{font-size:14px;line-height:1.7;white-space:pre-wrap}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:3px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}
 .toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:100}
+.modal.show{display:flex}
+.modal-box{background:#fff;padding:20px 22px;border-radius:4px;width:260px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.modal-t{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:10px}
+.modal-box input{width:100%;border:1px solid #999;border-radius:3px;font-size:16px;padding:8px 10px;outline:none;font-family:var(--font);letter-spacing:.2em}
+.modal-box input:focus{border-color:var(--ink)}
+.modal-err{font-size:12px;color:#C62828;min-height:18px;margin-top:4px}
+.modal-btns{display:flex;justify-content:flex-end;gap:6px}
 
 #printArea{display:none}
 
@@ -198,7 +206,7 @@ body{
 
 <div class="sb">
   <div class="sb-hd">
-    <div class="sb-title">교사 목록</div>
+    <div class="sb-title" ondblclick="adminToggle()" style="user-select:none">교사 목록</div>
     <div class="sb-cnt" id="sbCnt"></div>
   </div>
   <div class="sb-srch"><input id="srch" type="text" placeholder="이름 검색" oninput="renderList()"></div>
@@ -225,6 +233,19 @@ body{
 <div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
+<div class="modal" id="pwModal">
+  <div class="modal-box">
+    <div class="modal-t">비밀번호</div>
+    <input id="pwInput" type="password" inputmode="numeric" placeholder="비밀번호" autocomplete="off"
+      onkeydown="if(event.key==='Enter')adminCheck();if(event.key==='Escape')adminClose()">
+    <div class="modal-err" id="pwErr"></div>
+    <div class="modal-btns">
+      <button class="btn-p" onclick="adminClose()">취소</button>
+      <button class="btn-p solid" onclick="adminCheck()">확인</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
@@ -236,8 +257,11 @@ const DATE_LABEL = '11월 16일 월요일';   // 화면과 인쇄에 표시
 const DATE_SHORT = '11월 16일(월)';      // 메신저 문구에 사용
 const PAGE_URL   = 'https://chemistry12.github.io/final/1116.html';  // 메신저 문구에 넣을 조회 링크
 
-// 주소 끝에 ?admin 을 붙여 열면 메신저 문구가 보입니다 (예: 1116.html?admin)
-const ADMIN = new URLSearchParams(location.search).has('admin');
+// 관리자 모드: 왼쪽 위 '교사 목록' 글자를 더블클릭 → 비밀번호 입력 (다시 더블클릭하면 끝)
+//  비밀번호를 바꾸려면 새 비밀번호의 SHA-256 값을 ADMIN_HASH 에 넣으세요.
+const ADMIN_HASH = 'a7be8e1fe282a37cd666e0632b17d933fa13f21addf4798fc0455bc166e2488c';
+let ADMIN = false;
+try{ ADMIN = sessionStorage.getItem('admin1116') === '1'; }catch(e){}
 if(ADMIN) document.documentElement.classList.add('admin');
 
 // 모의고사 시험 시간 (수능 시간표와 같음)
@@ -612,9 +636,9 @@ function select(name){
   document.getElementById('content').innerHTML = buildDoc(name) + (ADMIN ? `
     <div class="msg">
       <div class="msg-hd">메신저 안내 문구 (관리자만 보임)
-        <button class="btn-p" onclick="copyImage()" style="margin-left:auto">이미지 복사</button>
-        <button class="btn-p" onclick="saveImage()" style="margin-left:6px">이미지 저장</button>
-        <button class="btn-p solid" onclick="copyMsg()" style="margin-left:6px">문구 복사</button>
+        <button class="btn-p solid" onclick="copyBoth()" style="margin-left:auto">문구+이미지 복사</button>
+        <button class="btn-p" onclick="copyMsg()" style="margin-left:6px">문구만</button>
+        <button class="btn-p" onclick="copyImage()" style="margin-left:6px">이미지만</button>
       </div>
       <div class="msg-body">${esc(buildMsg(name))}</div>
     </div>` : '');
@@ -668,13 +692,6 @@ function downloadBlob(blob, fname){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-async function saveImage(){
-  if(!cur) return;
-  showToast('이미지를 만드는 중...');
-  const blob = await canvasBlob(await renderImage(cur));
-  downloadBlob(blob, fileName(cur));
-  showToast(cur + ' 선생님 이미지를 저장했습니다');
-}
 async function copyImage(){
   if(!cur) return;
   showToast('이미지를 만드는 중...');
@@ -695,6 +712,68 @@ async function copyImage(){
     }
   }
 }
+// 문구와 이미지를 한 번에: 메신저가 HTML 붙여넣기를 지원하면 글과 그림이 같이 들어갑니다
+async function copyBoth(){
+  if(!cur) return;
+  showToast('문구와 이미지를 만드는 중...');
+  const text = buildMsg(cur);
+  const pngPromise = renderImage(cur).then(canvasBlob);
+  const htmlPromise = pngPromise.then(b => new Promise(r => {
+    const fr = new FileReader();
+    fr.onload = () => r(new Blob([
+      '<div>' + esc(text).replace(/\n/g, '<br>') + '</div><br><img src="' + fr.result + '" style="max-width:100%">'
+    ], {type:'text/html'}));
+    fr.readAsDataURL(b);
+  }));
+  try{
+    window.focus();
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/plain': new Blob([text], {type:'text/plain'}),
+      'text/html': htmlPromise,
+      'image/png': pngPromise,
+    })]);
+    showToast('문구와 이미지를 복사했습니다. 메신저에서 Ctrl+V 하세요');
+  }catch(e){
+    console.error(e);
+    showToast('함께 복사가 안 됩니다. [문구만] → [이미지만] 순서로 써 주세요');
+  }
+}
+
+// ── 관리자 모드 ──
+function adminToggle(){
+  if(ADMIN){
+    ADMIN = false;
+    try{ sessionStorage.removeItem('admin1116'); }catch(e){}
+    document.documentElement.classList.remove('admin');
+    if(cur) select(cur);
+    showToast('일반 화면으로 돌아왔습니다');
+    return;
+  }
+  document.getElementById('pwErr').textContent = '';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwModal').classList.add('show');
+  setTimeout(() => document.getElementById('pwInput').focus(), 30);
+}
+function adminClose(){ document.getElementById('pwModal').classList.remove('show'); }
+async function sha256(t){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function adminCheck(){
+  const v = document.getElementById('pwInput').value.trim();
+  if(await sha256(v) !== ADMIN_HASH){
+    document.getElementById('pwErr').textContent = '비밀번호가 맞지 않습니다';
+    document.getElementById('pwInput').select();
+    return;
+  }
+  ADMIN = true;
+  try{ sessionStorage.setItem('admin1116', '1'); }catch(e){}
+  document.documentElement.classList.add('admin');
+  adminClose();
+  if(cur) select(cur);
+  showToast('관리자 모드입니다');
+}
+
 async function saveAllImages(btn){
   const list = DB.teachers.filter(t => DB.diffs[t].length).sort((a,b) => rank(b) - rank(a));
   const zip = new JSZip();
