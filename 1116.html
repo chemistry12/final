@@ -255,6 +255,7 @@ body{
 const TITLE      = '수능대비 파이널 모의고사';
 const DATE_LABEL = '11월 16일 월요일';   // 화면과 인쇄에 표시
 const DATE_SHORT = '11월 16일(월)';      // 메신저 문구에 사용
+const IMG_SCALE  = 1.1;   // 메신저 이미지 크기 (1 = 화면 크기 약 820px 폭, 숫자를 키우면 커짐)
 const PAGE_URL   = 'https://chemistry12.github.io/final/1116.html';  // 메신저 문구에 넣을 조회 링크
 
 // 관리자 모드: 왼쪽 위 '교사 목록' 글자를 더블클릭 → 비밀번호 입력 (다시 더블클릭하면 끝)
@@ -679,7 +680,7 @@ async function renderImage(name){
   const paper = box.querySelector('.paper');
   paper.style.boxShadow = 'none';
   try{
-    return await html2canvas(paper, {scale:2, backgroundColor:'#ffffff', logging:false});
+    return await html2canvas(paper, {scale:IMG_SCALE, backgroundColor:'#ffffff', logging:false});
   } finally {
     box.remove();
   }
